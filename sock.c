@@ -4,6 +4,8 @@
 #include <net/if.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include "sock.h"
  
 
 // funcao de criacao de raw socket passada no enunciado do trabalho

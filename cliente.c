@@ -4,16 +4,31 @@
 #include <net/if.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "sock.h"
 
 int main() {
 
-    // criamos um socket com interface loopback
-    int sock = cria_raw_socket("lo");
+    // criamos um socket com interface das maquinas virtuais
+    int sock = cria_raw_socket("veth0");
 
+    struct pacote *pack = malloc(sizeof(struct pacote));
 
     // cliente vai enviar mensagens
     while (1) {
-        // codigo para enviar mensagens
+        // coloca marcador de inicio
+        pack->marcador = 0x7e;
+
+        printf("digite sua mensagem: ");
+        fgets(pack->dados, 128, stdin);
+        printf("esta eh a mensagem que voce enviou: %s\n", pack->dados);
+
+        ssize_t envio = send(sock, pack, 132, 0);
+        if (envio >= 0) {
+            printf("%d bytes enviados\n", envio);
+        }
+        else {
+            printf("erro ao enviar mensagem\n");
+        }
     }
 
     close(sock);
