@@ -34,6 +34,8 @@
 // ------------------------------------------------------------------------------------------------
 // ESTRUTURA
 
+#pragma pack(push, 1) // evita otimizacao de alinhamento de bytes (garante pacote de 131 bytes)
+
 struct pacote {
     // cabecalho do pacote
     uint8_t marcador;   // 8 bits para marcador de inicio
@@ -45,6 +47,8 @@ struct pacote {
     //dados
     uint8_t dados[127]; // vetor de bytes de dados
 };
+
+#pragma pack(pop); // restaura alinhamento padrao
 
 // ------------------------------------------------------------------------------------------------
 // FUNCOES

@@ -21,9 +21,8 @@ int main() {
 
         if (tam > 0) {
             // verifica marcador de inicio
-            if (pack->marcador == 0x70) {
+            if (pack->marcador == 0x7e) {
                 printf("recebido %d bytes\n", tam);
-
                 printf("mensagem: %s\n", pack->dados);
             }
         }
