@@ -4,13 +4,12 @@
 #include <net/if.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "sock.h"
 
 int main() {
 
     // criamos um socket com interface loopback
     int sock = cria_raw_socket("lo");
-
-    unsigned char buffer[132];
 
     // vamos fazer um loop para ficar esperando mensagens
     while (1) {
