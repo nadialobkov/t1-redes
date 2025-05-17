@@ -43,7 +43,7 @@ struct pacote {
     uint8_t checksum;   // 8 bits para checksum
 
     //dados
-    uint8_t *dados;     // vetor de bytes de dados
+    uint8_t dados[127]; // vetor de bytes de dados
 };
 
 // ------------------------------------------------------------------------------------------------

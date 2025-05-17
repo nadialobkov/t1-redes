@@ -8,12 +8,25 @@
 
 int main() {
 
-    // criamos um socket com interface loopback
-    int sock = cria_raw_socket("lo");
+    // criamos um socket com interface das maquinas virtuais 
+    int sock = cria_raw_socket("veth1");
+
+    struct pacote *pack = malloc(sizeof(struct pacote));
+    printf("%d\n", sizeof(struct pacote));
 
     // vamos fazer um loop para ficar esperando mensagens
     while (1) {
-        // codigo aqui de recebimento e tratamento de mensagens
+        // recebe dados
+        ssize_t tam = recv(sock, pack, 132, 0);
+
+        if (tam > 0) {
+            // verifica marcador de inicio
+            if (pack->marcador == 0x70) {
+                printf("recebido %d bytes\n", tam);
+
+                printf("mensagem: %s\n", pack->dados);
+            }
+        }
     }
 
     close(socket);
