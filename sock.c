@@ -48,7 +48,7 @@ int cria_raw_socket(char* nome_interface_rede) {
 //Calcula checksum --------------------------------------------------------------------------------
 //Campos: tamanho + sequência + tipo + dados
 //OBS: Soma o campo dos dados somente até a quantidade indicada pelo tamanho
-unsigned int calcula_checksum(struct pacote *pack)
+void calcula_checksum(struct pacote *pack)
 {
     unsigned int checksum;
 
@@ -66,13 +66,30 @@ unsigned int calcula_checksum(struct pacote *pack)
     //Escreve o valor no campo especificado
     pack->checksum = checksum;
 
-    return checksum;
 }
 //-------------------------------------------------------------------------------------------------
 
 //Verifica o campo do checksum da mensagem recebida -----------------------------------------------
+//*pack é a mensagem recebida
 unsigned int verifica_checksum(struct pacote *pack)
 {
+    unsigned int checksum_original;
 
+    //Armazena o valor inicial do checksum
+    checksum_original = pack->checksum;
+
+    //Zera temporariamente (para não interferir no cálculo)
+    pack->checksum = 0;
+
+    //Calcula o checksum da mensagem recebida
+    calcula_checksum(pack);
+
+    //Se não forem iguais, houve erro
+    if (checksum_original != pack->checksum)
+        return 0;
+
+    printf("Checksum OK!\n");
+    
+    return 1;
 }
 //-------------------------------------------------------------------------------------------------

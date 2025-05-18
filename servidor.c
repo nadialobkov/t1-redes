@@ -24,6 +24,7 @@ int main() {
             if (pack->marcador == 0x7e) {
                 printf("recebido %ld bytes\n", tam);
                 printf("mensagem: %s\n", pack->dados);
+                verifica_checksum(pack);
             }
         }
     }

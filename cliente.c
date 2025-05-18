@@ -25,7 +25,7 @@ int main() {
         //calcula o tamanho do que foi digitado
         int aux = strlen(pack->dados);
         pack->tam = aux;
-        int checksum = calcula_checksum(pack);
+        calcula_checksum(pack);
         printf("o tamanho da mensagem é: %d\n", pack->tam);
         printf("checksum = %d\n", pack->checksum);
         //-------------------------------------------------------------------------------
