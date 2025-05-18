@@ -87,9 +87,9 @@ unsigned int verifica_checksum(struct pacote *pack)
     //Se não forem iguais, houve erro
     if (checksum_original != pack->checksum)
         return 0;
-
-    printf("Checksum OK!\n");
     
+    printf("Checksum OK!\n");
+
     return 1;
 }
 //-------------------------------------------------------------------------------------------------

@@ -22,9 +22,15 @@ int main() {
         if (tam > 0) {
             // verifica marcador de inicio
             if (pack->marcador == 0x7e) {
+                //alterei um bit para testar se a função encontra o erro
+                //pack->dados[0] = pack->dados[0] ^ 0xFF;
+
+                int verificaChecksum = verifica_checksum(pack);
+                if (!verificaChecksum)
+                    printf("ERRO NO CHECKSUM\n");
+                
                 printf("recebido %ld bytes\n", tam);
                 printf("mensagem: %s\n", pack->dados);
-                verifica_checksum(pack);
             }
         }
     }
