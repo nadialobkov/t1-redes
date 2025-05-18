@@ -44,3 +44,35 @@ int cria_raw_socket(char* nome_interface_rede) {
 }
 
 // ------------------------------------------------------------------------------------------------
+
+//Calcula checksum --------------------------------------------------------------------------------
+//Campos: tamanho + sequência + tipo + dados
+//OBS: Soma o campo dos dados somente até a quantidade indicada pelo tamanho
+unsigned int calcula_checksum(struct pacote *pack)
+{
+    unsigned int checksum;
+
+    checksum = pack->tam + pack->seq + pack->tipo;
+
+    //Soma os dados escritos
+    for (int i = 0; i < pack->tam; i++)
+        checksum += pack->dados[i];
+
+    //Garante que o valor vai ter 8 bits 
+    //Pega os 8 bits menos significativos
+    //checksum AND 11111111 (por isso mantém somente os 8 bits menos significativos ligados)
+    checksum = checksum & 0xFF;
+
+    //Escreve o valor no campo especificado
+    pack->checksum = checksum;
+
+    return checksum;
+}
+//-------------------------------------------------------------------------------------------------
+
+//Verifica o campo do checksum da mensagem recebida -----------------------------------------------
+unsigned int verifica_checksum(struct pacote *pack)
+{
+
+}
+//-------------------------------------------------------------------------------------------------

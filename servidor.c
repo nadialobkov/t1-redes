@@ -12,7 +12,7 @@ int main() {
     int sock = cria_raw_socket("veth1");
 
     struct pacote *pack = malloc(sizeof(struct pacote));
-    printf("%d\n", sizeof(struct pacote));
+    printf("%ld\n", sizeof(struct pacote));
 
     // vamos fazer um loop para ficar esperando mensagens
     while (1) {
@@ -22,12 +22,12 @@ int main() {
         if (tam > 0) {
             // verifica marcador de inicio
             if (pack->marcador == 0x7e) {
-                printf("recebido %d bytes\n", tam);
+                printf("recebido %ld bytes\n", tam);
                 printf("mensagem: %s\n", pack->dados);
             }
         }
     }
 
-    close(socket);
+    pclose(socket);
     return 0;
 }
