@@ -57,8 +57,17 @@ struct pacote {
 // retorna file descriptor do socket
 int cria_raw_socket(char* nome_interface_rede);
 
+//Calcula a soma dos bits dos campos tamanho, sequência, tipo e dados
+//Guarda o valor no pacote
+void calcula_checksum(struct pacote *pack);
 
+//Verifica se o checksum está correto (momento que recebe o pacote)
+//Retorna 1 se estiver tudo certo e 0 se houver erro
+unsigned int verifica_checksum(struct pacote *pack);
 
+//Detecta o tipo dos dados
+//Retorno: void (altera somente o campo pack->tipo da struct)
+void detecta_tipo(struct pacote *pack, char *caminho_arquivo);
 
 
 

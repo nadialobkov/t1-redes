@@ -20,6 +20,16 @@ int main() {
 
         printf("digite sua mensagem: ");
         fgets(pack->dados, 128, stdin);
+        
+        //Testando o calcula_checksum --------------------------------------------------
+        //calcula o tamanho do que foi digitado
+        int aux = strlen(pack->dados);
+        pack->tam = aux;
+        calcula_checksum(pack);
+        printf("o tamanho da mensagem é: %d\n", pack->tam);
+        printf("checksum = %d\n", pack->checksum);
+        //-------------------------------------------------------------------------------
+
         printf("esta eh a mensagem que voce enviou: %s\n", pack->dados);
 
         ssize_t envio = send(sock, pack, 132, 0);
