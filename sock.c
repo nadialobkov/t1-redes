@@ -4,6 +4,7 @@
 #include <net/if.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 #include "sock.h"
  
@@ -107,5 +108,52 @@ void detecta_tipo(struct pacote *pack, char *caminho_arquivo)
         pack->tipo = 0001;
     else if (extensao == '.txt')
         pack->tipo = 0010;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+
+// prepara vetor de pacotes com os dados a serem enviados
+// recebe nome do arquivo e tipo (extensao) do arquivo (TXT, IMG, VIDEO)
+
+struct pacote **prepara_dados(const char *nome, char extensao) {
+
+    // usa estrutura stat para conseguir info do arquivo
+    struct stat info;
+
+    if(stat(nome, &info) == -1) {
+        perror("Erro ao obter informações do arquivo");
+        return (NULL);
+    }
+    // obtem tamanho do arquivo
+    uint8_t tamanho = info.st_size;
+
+    // abre o arquivo
+    FILE *arquivo = fopen(nome, "r");
+    if (!arquivo) {
+        perror("Erro ao abrir arquivo");
+        return (NULL);
+    }
+    fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
+
+    // descobre quantos pacotes serao necessarios para enviar todo o arquivo
+    uint8_t num = (tamanho / TAM_MAX) + 1; // teto
+
+    // cria vetor de pacotes
+    struct pacote **packets = malloc(num * sizeof(struct pacote *));
+
+    for (uint8_t i = 0; i < num; i++) {
+
+        packets[i] = malloc(sizeof(struct pacote));
+
+        packets[i]->marcador = MARC;
+        packets[i]->seq = i % 32;
+        packets[i]->tipo = DADOS;
+
+        uint8_t bytes_lidos = fgets(packets[i]->dados, TAM_MAX, arquivo);
+        packets[i]->tam = bytes_lidos; 
+    }
+
+    return (packets); 
 }
 

@@ -30,6 +30,11 @@
 #define SEM_PERM    0   // sem permissao de acesso
 #define SEM_ESP     1   // espaco insuficiente
 
+// tamanho do campo de dados
+#define TAM_MAX 127
+
+// valor marcador de inicio
+#define MARC 0x7e
 
 // ------------------------------------------------------------------------------------------------
 // ESTRUTURA
@@ -45,7 +50,7 @@ struct pacote {
     uint8_t checksum;   // 8 bits para checksum
 
     //dados
-    uint8_t dados[127]; // vetor de bytes de dados
+    uint8_t dados[TAM_MAX]; // vetor de bytes de dados
 };
 
 #pragma pack(pop); // restaura alinhamento padrao
