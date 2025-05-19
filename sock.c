@@ -114,14 +114,14 @@ void detecta_tipo(struct pacote *pack, char *caminho_arquivo)
 //-------------------------------------------------------------------------------------------------
 
 // prepara vetor de pacotes com os dados a serem enviados
-// recebe nome do arquivo e tipo (extensao) do arquivo (TXT, IMG, VIDEO)
+// recebe caminho do arquivo
 
-struct pacote **prepara_dados(const char *nome, char extensao) {
+struct pacote **prepara_pacotes_dados(const char *caminho) {
 
     // usa estrutura stat para conseguir info do arquivo
     struct stat info;
 
-    if(stat(nome, &info) == -1) {
+    if(stat(caminho, &info) == -1) {
         perror("Erro ao obter informações do arquivo");
         return (NULL);
     }
@@ -129,7 +129,7 @@ struct pacote **prepara_dados(const char *nome, char extensao) {
     uint8_t tamanho = info.st_size;
 
     // abre o arquivo
-    FILE *arquivo = fopen(nome, "r");
+    FILE *arquivo = fopen(caminho, "r");
     if (!arquivo) {
         perror("Erro ao abrir arquivo");
         return (NULL);
@@ -142,6 +142,8 @@ struct pacote **prepara_dados(const char *nome, char extensao) {
     // cria vetor de pacotes
     struct pacote **packets = malloc(num * sizeof(struct pacote *));
 
+    // cria pacotes com os pedaços de dados do arquivo
+    // inicializa campos da estrutura
     for (uint8_t i = 0; i < num; i++) {
 
         packets[i] = malloc(sizeof(struct pacote));
@@ -152,8 +154,45 @@ struct pacote **prepara_dados(const char *nome, char extensao) {
 
         uint8_t bytes_lidos = fgets(packets[i]->dados, TAM_MAX, arquivo);
         packets[i]->tam = bytes_lidos; 
+
+        calcula_checksum(packets[i]);
     }
+
+    fclose(arquivo);
 
     return (packets); 
 }
 
+
+//-------------------------------------------------------------------------------------------------
+
+// recebe um vetor de pacotes contendo dados separados sequencialmente
+// escreve o arquivo no caminho passado 
+// retorna 0 em caso de sucesso e valores negativos em caso de erro
+
+uint8_t interpreta_pacotes_dados(struct pacote **packets, const char *caminho) {
+
+    // cria o arquivo para copiar os dados do pacote
+    FILE *arquivo = fopen(caminho, "w");
+    if (!arquivo) {
+        perror("Erro ao criar arquivo");
+        return (NULL);
+    }
+    fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
+
+    if (!packets) {
+        perror("Erro: vetor de pacotes inválido");
+        return (-1);
+    }
+
+    // vamos percorres os pacotes escrever os dados no arquivo
+    uint8_t i = 0;
+    while (packets[i]) {    // nao sei se esta muito seguro
+        fputs(packets[i]->dados, arquivo);
+        i++;
+    }
+
+    fclose(arquivo);
+
+    return (0);
+}

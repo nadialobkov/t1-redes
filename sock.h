@@ -74,6 +74,13 @@ unsigned int verifica_checksum(struct pacote *pack);
 //Retorno: void (altera somente o campo pack->tipo da struct)
 void detecta_tipo(struct pacote *pack, char *caminho_arquivo);
 
+// Prepara um vetor de pacotes de dados que formam um arquivo para serem enviados sequencialmente
+// Retorno: vetor de pacotes
+struct pacote **prepara_pacotes_dados(const char *caminho);
+
+// Cria um arquivo no caminho indicado com os dados presentes no vetor de pacotes
+// Retorno: 0 em caso de sucesso e valores negativos em caso de erro
+uint8_t interpreta_pacotes_dados(struct pacote **packets, const char *caminho);
 
 
 #endif
