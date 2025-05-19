@@ -80,7 +80,7 @@ struct pacote **prepara_pacotes_dados(const char *caminho);
 
 // Cria um arquivo no caminho indicado com os dados presentes no vetor de pacotes
 // Retorno: 0 em caso de sucesso e valores negativos em caso de erro
-uint8_t interpreta_pacotes_dados(struct pacote **packets, const char *caminho);
+uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const char *caminho);
 
 
 #endif

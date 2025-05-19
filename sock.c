@@ -126,7 +126,7 @@ struct pacote **prepara_pacotes_dados(const char *caminho) {
         return (NULL);
     }
     // obtem tamanho do arquivo
-    uint8_t tamanho = info.st_size;
+    ssize_t tamanho = info.st_size;
 
     // abre o arquivo
     FILE *arquivo = fopen(caminho, "r");
@@ -137,26 +137,45 @@ struct pacote **prepara_pacotes_dados(const char *caminho) {
     fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
 
     // descobre quantos pacotes serao necessarios para enviar todo o arquivo
-    uint8_t num = (tamanho / TAM_MAX) + 1; // teto
+    ssize_t num = (tamanho / TAM_MAX) + 1; // teto
 
     // cria vetor de pacotes
     struct pacote **packets = malloc(num * sizeof(struct pacote *));
+    if (!packets) {
+        perror("Erro ao criar vetor de pacotes");
+        return (-2);
+    }
+
+    printf("tamanho arquivo: %d\n", tamanho);
+    printf("num: %d\n", num);
+
 
     // cria pacotes com os pedaços de dados do arquivo
     // inicializa campos da estrutura
-    for (uint8_t i = 0; i < num; i++) {
+    for (ssize_t i = 0; i < num; i++) {
+
+        printf("i: %d\n", i);
 
         packets[i] = malloc(sizeof(struct pacote));
+        if (!packets) {
+            perror("Erro ao criar pacote de transmissao de dados");
+            return (-3);
+        }
 
         packets[i]->marcador = MARC;
         packets[i]->seq = i % 32;
         packets[i]->tipo = DADOS;
 
-        uint8_t bytes_lidos = fgets(packets[i]->dados, TAM_MAX, arquivo);
+        ssize_t bytes_lidos = fread(packets[i]->dados, 1, TAM_MAX, arquivo);
+        printf("leu tantos bytes: %d\n", bytes_lidos);
+        printf("leu: %s\n", packets[i]->dados);
+
         packets[i]->tam = bytes_lidos; 
 
         calcula_checksum(packets[i]);
     }
+
+    printf("saiu laco\n");
 
     fclose(arquivo);
 
@@ -170,7 +189,7 @@ struct pacote **prepara_pacotes_dados(const char *caminho) {
 // escreve o arquivo no caminho passado 
 // retorna 0 em caso de sucesso e valores negativos em caso de erro
 
-uint8_t interpreta_pacotes_dados(struct pacote **packets, const char *caminho) {
+uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const char *caminho) {
 
     // cria o arquivo para copiar os dados do pacote
     FILE *arquivo = fopen(caminho, "w");
@@ -186,10 +205,8 @@ uint8_t interpreta_pacotes_dados(struct pacote **packets, const char *caminho) {
     }
 
     // vamos percorres os pacotes escrever os dados no arquivo
-    uint8_t i = 0;
-    while (packets[i]) {    // nao sei se esta muito seguro
+    for (uint8_t i = 0; i < tam; i++) {
         fputs(packets[i]->dados, arquivo);
-        i++;
     }
 
     fclose(arquivo);
