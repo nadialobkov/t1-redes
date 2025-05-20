@@ -157,7 +157,7 @@ struct pacote **prepara_pacotes_dados(const char *caminho) {
         printf("i: %d\n", i);
 
         packets[i] = malloc(sizeof(struct pacote));
-        if (!packets) {
+        if (!packets[i]) {
             perror("Erro ao criar pacote de transmissao de dados");
             return (-3);
         }
