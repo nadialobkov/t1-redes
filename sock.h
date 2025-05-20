@@ -65,9 +65,9 @@ void calcula_checksum(struct pacote *pack);
 //Retorna 1 se estiver tudo certo e 0 se houver erro
 unsigned int verifica_checksum(struct pacote *pack);
 
-//Detecta o tipo dos dados
-//Retorno: void (altera somente o campo pack->tipo da struct)
-void detecta_tipo(struct pacote *pack, char *caminho_arquivo);
+//Detecta o tipo dos dados (extensão)
+//Recebe um arquivo e retorna sua extensão
+char* devolve_extensao(char *caminho_arquivo);
 
 
 

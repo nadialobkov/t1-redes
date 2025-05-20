@@ -94,18 +94,44 @@ unsigned int verifica_checksum(struct pacote *pack)
 }
 //-------------------------------------------------------------------------------------------------
 
-//Detecta o tipo dos dados ------------------------------------------------------------------------
-void detecta_tipo(struct pacote *pack, char *caminho_arquivo)
+//Detecta a extensão dos dados --------------------------------------------------------------------
+char* devolve_extensao(char *caminho_arquivo)
 {
-    //Busca o ponto do nome do arquivo para encontrar a extensão
-    //Retorna um ponteiro para o último caractere '.' na string
-    char *extensao = strrchr(caminho_arquivo, '.');
+    //Abre o arquivo em modo binário
+    FILE *arquivo = fopen(caminho_arquivo, "rb");
 
-    if (extensao == '.jpg')
-        pack->tipo = 0000;
-    else if (extensao == '.mp4')
-        pack->tipo = 0001;
-    else if (extensao == '.txt')
-        pack->tipo = 0010;
+    //Se não conseguiu abrir o arquivo
+    if (!arquivo)
+    {
+        //Assume que algo foi lido pelo terminal
+        printf("Não foi possível abrir o arquivo!\n");
+        return NULL;
+    }
+
+    //Buffer para armazenar o cabeçalho que será lido
+    unsigned char cabecalho[8];
+
+    //Lê o cabeçalho e retorna a quantidade de itens lidos com sucesso
+    size_t lidos = fread(cabecalho, 1, 8, arquivo);
+
+    //Fecha o arquivo
+    fclose(arquivo);
+
+    if (lidos < 8)
+    {
+        printf("Erro ou Arquivo muito pequeno\n");
+        return NULL;
+    }
+    else
+    {
+        if (cabecalho[0] == 0xFF && cabecalho[1] == 0xD8)
+            return(".jpg");
+        else if (cabecalho[4] == 0x66 && cabecalho[5] == 0x74 && cabecalho[6] == 0x79 && cabecalho[7] == 0x70)
+            return(".mp4");
+        else
+            return(".txt");
+    }
+    
+    
 }
 

@@ -31,6 +31,11 @@ int main() {
                 
                 printf("recebido %ld bytes\n", tam);
                 printf("mensagem: %s\n", pack->dados);
+                printf("tipo = %d\n", pack->tipo);
+
+                //Captura a extensão do arquivo
+                //char *extensao = devolve_extensao("foto_teste.jpg");
+                //printf("Extensão do teste: %s\n", extensao);
             }
         }
     }
