@@ -39,6 +39,7 @@ int main() {
         else {
             printf("erro ao enviar mensagem\n");
         }
+        printf("tipo = %d\n", pack->tipo);
     }
 
     close(sock);
