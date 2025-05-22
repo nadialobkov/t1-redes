@@ -69,6 +69,6 @@ unsigned int verifica_checksum(struct pacote *pack);
 //Recebe um arquivo e retorna sua extensão
 char* devolve_extensao(char *caminho_arquivo);
 
-
+void exibe_arquivo(const char *caminho_arquivo);
 
 #endif

@@ -2,6 +2,10 @@
 #include <net/ethernet.h>
 #include <linux/if_packet.h>
 #include <net/if.h>
+#include <unistd.h>         //Para reproduzir imagens e vídeos
+#include <sys/wait.h>       //Para reproduzir imagens e vídeos
+#include <sys/types.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -131,7 +135,51 @@ char* devolve_extensao(char *caminho_arquivo)
         else
             return(".txt");
     }
-    
-    
-}
 
+}
+//------------------------------------------------------------------------------------------------------------------
+
+//Exibe o arquivo (Tesouro) na tela com um processo filho
+//OBS: Usar o comando which nome_do_aplicativo para saber se está instalado no computador
+void exibe_arquivo(const char *caminho_arquivo)
+{
+    //Descobre o formato do arquivo
+    const char *extensao = devolve_extensao(caminho_arquivo);
+
+    printf("Extensão = %s\n", extensao);
+    if (!extensao)
+    {
+        printf("Erro ao obter a extensão do arquivo\n");
+        return;
+    }
+
+    //Cria um processo filho
+    pid_t pid = fork();
+
+    //Com base na extensão, preenche os campos dos argumentos
+    char *args[3];
+    if (strcmp(extensao, ".jpg") == 0)
+        args[0] = "/usr/bin/feh";       //local do aplicativo
+    else if (strcmp(extensao, ".mp4") == 0)
+        args[0] = "/usr/bin/ffplay";    //local do aplicativo
+    else
+        args[0] = "/usr/bin/gedit";     //local do aplicativo
+
+    args[1] = caminho_arquivo;
+    args[2] = NULL;
+
+    //Executa o processo filho
+    if (pid == 0)
+    {
+        execv(args[0], args);
+        perror("execv() falhou!\n");
+    }
+    else if (pid > 0)
+    {
+        //Processo Pai espera
+        wait(NULL);
+        printf("Arquivo visualizado!\n");
+    }
+    else
+        perror("fork() falhou :(\n");
+}
