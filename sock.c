@@ -177,7 +177,7 @@ void exibe_arquivo(const char *caminho_arquivo)
     else if (pid > 0)
     {
         //Processo Pai espera
-        wait(NULL);
+        //wait(NULL);
         printf("Arquivo visualizado!\n");
     }
     else
