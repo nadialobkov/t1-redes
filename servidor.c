@@ -13,6 +13,7 @@ int main() {
 
     struct pacote *pack = malloc(sizeof(struct pacote));
     printf("%ld\n", sizeof(struct pacote));
+    struct pacote *nack = malloc(sizeof(struct pacote));
 
     // vamos fazer um loop para ficar esperando mensagens
     while (1) {
@@ -24,11 +25,15 @@ int main() {
             if (pack->marcador == 0x7e) {
                 //alterei um bit para testar se a função encontra o erro
                 //pack->dados[0] = pack->dados[0] ^ 0xFF;
-
+                /*
                 int verificaChecksum = verifica_checksum(pack);
                 if (!verificaChecksum)
+                {
                     printf("ERRO NO CHECKSUM\n");
-                
+                    nack->tipo = NACK;
+                    ssize_t envio_nack = send(sock, nack, 132, 0);
+                }*/
+
                 printf("recebido %ld bytes\n", tam);
                 printf("mensagem: %s\n", pack->dados);
                 printf("tipo = %d\n", pack->tipo);
@@ -37,8 +42,19 @@ int main() {
                 //Captura a extensão do arquivo
                 //char *extensao = devolve_extensao("foto_teste.jpg");
                 //printf("Extensão do teste: %s\n", extensao);
-                exibe_arquivo("foto_teste.jpg");
+                //exibe_arquivo("foto_teste.jpg");
+                struct pacote *ack = ack_format_arq(pack);      //é um tipo de ack + ok
+                printf("ack->tipo = %d\n", ack->tipo);
+
+                ssize_t envio_ack = send(sock, ack, 132, 0);
+                //se o ack não chegar tratar no timeout
             }
+        }
+        else
+        {
+            //A mensagem não chegou, então envia um nack
+            nack->tipo = 1;
+            ssize_t envio_nack = send(sock, nack, 132, 0);
         }
     }
 

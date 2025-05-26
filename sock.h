@@ -29,6 +29,7 @@
 // codigos de erros
 #define SEM_PERM    0   // sem permissao de acesso
 #define SEM_ESP     1   // espaco insuficiente
+#define MARC_ERR0   2   // marcador de início errado
 
 
 // ------------------------------------------------------------------------------------------------
@@ -69,6 +70,17 @@ unsigned int verifica_checksum(struct pacote *pack);
 //Recebe um arquivo e retorna sua extensão
 char* devolve_extensao(char *caminho_arquivo);
 
+//Mostra o arquivo na tela
 void exibe_arquivo(const char *caminho_arquivo);
+
+//Atribui o ack + formato do arquivo e coloca o nome dele no campo de dados
+//Retorno: um pacote que é a mensagem de ACK
+struct pacote* ack_format_arq(struct pacote *pack);
+
+//Trata os casos de ACK, NACK e ERRO
+//Retorno: os bytes enviados ou 0 em caso de ACK
+
+
+
 
 #endif

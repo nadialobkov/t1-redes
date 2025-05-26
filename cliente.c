@@ -20,6 +20,9 @@ int main() {
 
         printf("digite sua mensagem: ");
         fgets(pack->dados, 128, stdin);
+
+        //unsigned int tamanho_string = strlen(pack->dados);
+        //pack->dados[tamanho_string - 1] = '\0';
         
         //Testando o calcula_checksum --------------------------------------------------
         //calcula o tamanho do que foi digitado
@@ -32,6 +35,7 @@ int main() {
 
         printf("esta eh a mensagem que voce enviou: %s\n", pack->dados);
 
+        //Ainda precisa tratar se recebeu ack, nack ou erro 
         ssize_t envio = send(sock, pack, 132, 0);
         if (envio >= 0) {
             printf("%d bytes enviados\n", envio);
@@ -39,7 +43,37 @@ int main() {
         else {
             printf("erro ao enviar mensagem\n");
         }
-        printf("tipo = %d\n", pack->tipo);
+        struct pacote *ack = malloc(sizeof(struct pacote));
+        ssize_t ack_recebido = recv(sock, ack, 132, 0);
+        //colocar em uma função
+        if (ack_recebido > 0)
+        {
+            if (ack->tipo == NACK)
+            {
+                //tratar (enviar novamente)
+                envio = send(sock, pack, 132, 0);
+                if (envio <= 0)
+                    printf("Erro ao enviar mensagem.\n");
+            }
+            else if (ack->tipo == ERRO)
+            {
+                //tratar
+            }
+            else if (ack->tipo == ACK)
+            {
+                //espera o ack + ok
+            }
+            else
+            {
+                //mensagem recebida e processada, então podemos enviar as próximas
+                continue;
+            }
+        }
+        else
+        {
+            //devemos enviar novamente (a mensaagem de resposta foi perdida)
+            //
+        }
     }
 
     close(sock);
