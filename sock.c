@@ -126,7 +126,7 @@ struct pacote **prepara_pacotes_dados(const char *caminho) {
         return (NULL);
     }
     // obtem tamanho do arquivo
-    ssize_t tamanho = info.st_size;
+    size_t tamanho = info.st_size;
 
     // abre o arquivo
     FILE *arquivo = fopen(caminho, "r");
@@ -137,7 +137,7 @@ struct pacote **prepara_pacotes_dados(const char *caminho) {
     fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
 
     // descobre quantos pacotes serao necessarios para enviar todo o arquivo
-    ssize_t num = (tamanho / TAM_MAX) + 1; // teto
+    size_t num = (tamanho / TAM_MAX) + 1; // teto
 
     // cria vetor de pacotes
     struct pacote **packets = malloc(num * sizeof(struct pacote *));
@@ -152,7 +152,7 @@ struct pacote **prepara_pacotes_dados(const char *caminho) {
 
     // cria pacotes com os pedaços de dados do arquivo
     // inicializa campos da estrutura
-    for (ssize_t i = 0; i < num; i++) {
+    for (size_t i = 0; i < num; i++) {
 
         printf("i: %d\n", i);
 
@@ -166,7 +166,7 @@ struct pacote **prepara_pacotes_dados(const char *caminho) {
         packets[i]->seq = i % 32;
         packets[i]->tipo = DADOS;
 
-        ssize_t bytes_lidos = fread(packets[i]->dados, 1, TAM_MAX, arquivo);
+        size_t bytes_lidos = fread(packets[i]->dados, 1, TAM_MAX, arquivo);
         printf("leu tantos bytes: %d\n", bytes_lidos);
         printf("leu: %s\n", packets[i]->dados);
 

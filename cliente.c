@@ -26,22 +26,28 @@ int main() {
         if (envio >= 0) {
             printf("%d bytes enviados\n", envio);
 
-            
-                struct pacote **packets = malloc(1000000); // max 1 MB 
+                // aloca um espaco para um um vetor de pacotes que vai ter arquivo de no max 128 * 10 000 bytes
+                struct pacote **packets = malloc(10000 * sizeof(struct pacote *));
 
                 uint8_t i = 0;
+                packets[i] = malloc(sizeof(struct pacote));
+
                 while (1) {
-                    packets[i] = malloc(sizeof(struct pacote));
+                    // recebe pacotes
                     recv(sock, packets[i], 131, 0);
-                    if (packets[i] == MARC){
-                        i++;
+                    if (packets[i]->marcador == MARC){ // verifica marcador
+                        if (packets[i]->tipo == DADOS) {
+                            i++;
+                            packets[i] = malloc(sizeof(struct pacote));
+                        }
                         if (packets[i]->tipo == FIM) {
                             interpreta_pacotes_dados(packets, i, "arquivo.txt");
+                            printf("recebeuu!\n");
                             break;
                         }
                     }
-
                 }
+
         }
         else {
             printf("erro ao enviar mensagem\n");
