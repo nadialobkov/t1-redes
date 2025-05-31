@@ -95,22 +95,6 @@ unsigned int verifica_checksum(struct pacote *pack)
 }
 //-------------------------------------------------------------------------------------------------
 
-//Detecta o tipo dos dados ------------------------------------------------------------------------
-void detecta_tipo(struct pacote *pack, char *caminho_arquivo)
-{
-    //Busca o ponto do nome do arquivo para encontrar a extensão
-    //Retorna um ponteiro para o último caractere '.' na string
-    char *extensao = strrchr(caminho_arquivo, '.');
-
-    if (extensao == '.jpg')
-        pack->tipo = 0000;
-    else if (extensao == '.mp4')
-        pack->tipo = 0001;
-    else if (extensao == '.txt')
-        pack->tipo = 0010;
-}
-
-
 //-------------------------------------------------------------------------------------------------
 
 // prepara vetor de pacotes com os dados a serem enviados
