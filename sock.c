@@ -218,7 +218,8 @@ struct pacote* ack_format_arq(struct pacote *pack)
 
 }
 
-//Verifica o pacote e econtra erros 
+//Verifica o pacote e econtra erros
+//OBS: Talvez não precisemos dessa função
 struct pacote* verifica_pacote(struct pacote *pack)
 {
     struct pacote *mensagem = malloc(sizeof(struct pacote));
