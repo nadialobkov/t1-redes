@@ -12,7 +12,7 @@ int main() {
     int sock = cria_raw_socket("veth1");
 
     struct pacote *pack = malloc(sizeof(struct pacote));
-    printf("%ld\n", sizeof(struct pacote));
+    printf("esperando envio do caminho do arquivo...\n");
 
     // vamos fazer um loop para ficar esperando mensagens
     while (1) {
@@ -29,15 +29,29 @@ int main() {
                 if (!verificaChecksum)
                     printf("ERRO NO CHECKSUM\n");
                 
-                printf("recebido %ld bytes\n", tam);
-                printf("mensagem: %s\n", pack->dados);
-                printf("tipo = %d\n", pack->tipo);
-                
-                //Teste
-                //Captura a extensão do arquivo
-                //char *extensao = devolve_extensao("foto_teste.jpg");
-                //printf("Extensão do teste: %s\n", extensao);
-                exibe_arquivo("foto_teste.jpg");
+
+                char *caminho = pack->dados; 
+                int tam = strlen(caminho);
+                caminho[tam-1] = 0; // tira \n
+                printf("recebido: %s\n", caminho);
+
+
+                struct pacote **packets = prepara_pacotes_dados((const char *) pack->dados);
+                if (packets ==  NULL) {
+                    printf("erro em criar pacotes\n");
+
+                }
+
+                ssize_t i = 0;
+                printf("oi\n");
+                printf("%x\n", packets[i]->tipo);
+                while (packets[i]) { // nao sei se esta muito seguro
+                    printf("enviando pacote %d", i);
+                    send(sock, packets[i], 131, 0);
+                    i++;
+                }
+                pack->tipo = FIM;
+                send(sock, pack, 131, 0);
             }
         }
     }

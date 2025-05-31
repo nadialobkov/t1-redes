@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 #include "sock.h"
  
@@ -135,9 +136,8 @@ char* devolve_extensao(char *caminho_arquivo)
         else
             return(".txt");
     }
-
 }
-//------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 //Exibe o arquivo (Tesouro) na tela com um processo filho
 //OBS: Usar o comando which nome_do_aplicativo para saber se está instalado no computador
@@ -182,4 +182,104 @@ void exibe_arquivo(const char *caminho_arquivo)
     }
     else
         perror("fork() falhou :(\n");
+}
+//----------------------------------------------------------------------------------------------------------------------
+
+// prepara vetor de pacotes com os dados a serem enviados
+// recebe caminho do arquivo
+
+struct pacote **prepara_pacotes_dados(const char *caminho) {
+
+    // usa estrutura stat para conseguir info do arquivo
+    struct stat info;
+
+    if(stat(caminho, &info) == -1) {
+        perror("Erro ao obter informações do arquivo");
+        return (NULL);
+    }
+    // obtem tamanho do arquivo
+    size_t tamanho = info.st_size;
+
+    // abre o arquivo
+    FILE *arquivo = fopen(caminho, "r");
+    if (!arquivo) {
+        perror("Erro ao abrir arquivo");
+        return (NULL);
+    }
+    fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
+
+    // descobre quantos pacotes serao necessarios para enviar todo o arquivo
+    size_t num = (tamanho / TAM_MAX) + 1; // teto
+
+    // cria vetor de pacotes
+    struct pacote **packets = malloc(num * sizeof(struct pacote *));
+    if (!packets) {
+        perror("Erro ao criar vetor de pacotes");
+        return (-2);
+    }
+
+    printf("tamanho arquivo: %d\n", tamanho);
+    printf("num: %d\n", num);
+
+
+    // cria pacotes com os pedaços de dados do arquivo
+    // inicializa campos da estrutura
+    for (size_t i = 0; i < num; i++) {
+
+        printf("i: %d\n", i);
+
+        packets[i] = malloc(sizeof(struct pacote));
+        if (!packets[i]) {
+            perror("Erro ao criar pacote de transmissao de dados");
+            return (-3);
+        }
+
+        packets[i]->marcador = MARC;
+        packets[i]->seq = i % 32;
+        packets[i]->tipo = DADOS;
+
+        size_t bytes_lidos = fread(packets[i]->dados, 1, TAM_MAX, arquivo);
+        printf("leu tantos bytes: %d\n", bytes_lidos);
+        printf("leu: %s\n", packets[i]->dados);
+
+        packets[i]->tam = bytes_lidos; 
+
+        calcula_checksum(packets[i]);
+    }
+
+    printf("saiu laco\n");
+
+    fclose(arquivo);
+
+    return (packets); 
+}
+//------------------------------------------------------------------------------------------------------------------
+
+// recebe um vetor de pacotes contendo dados separados sequencialmente
+// escreve o arquivo no caminho passado 
+// retorna 0 em caso de sucesso e valores negativos em caso de erro
+
+uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const char *caminho) {
+
+    // cria o arquivo para copiar os dados do pacote
+    FILE *arquivo = fopen(caminho, "w");
+    if (!arquivo) {
+        perror("Erro ao criar arquivo");
+        return (NULL);
+    }
+    fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
+
+    if (!packets) {
+        perror("Erro: vetor de pacotes inválido");
+        return (-1);
+    }
+
+    // vamos percorres os pacotes escrever os dados no arquivo
+    for (uint8_t i = 0; i < tam; i++) {
+        fputs(packets[i]->dados, arquivo);
+    }
+
+    fclose(arquivo);
+
+    return (0);
 }

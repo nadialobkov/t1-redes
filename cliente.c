@@ -18,23 +18,36 @@ int main() {
         // coloca marcador de inicio
         pack->marcador = 0x7e;
 
-        printf("digite sua mensagem: ");
+        printf("digite caminho do arquivo que deseja receber: ");
         fgets(pack->dados, 128, stdin);
-        
-        //Testando o calcula_checksum --------------------------------------------------
-        //calcula o tamanho do que foi digitado
-        int aux = strlen(pack->dados);
-        pack->tam = aux;
-        calcula_checksum(pack);
-        printf("o tamanho da mensagem é: %d\n", pack->tam);
-        printf("checksum = %d\n", pack->checksum);
-        //-------------------------------------------------------------------------------
-
         printf("esta eh a mensagem que voce enviou: %s\n", pack->dados);
 
         ssize_t envio = send(sock, pack, 132, 0);
         if (envio >= 0) {
             printf("%d bytes enviados\n", envio);
+
+                // aloca um espaco para um um vetor de pacotes que vai ter arquivo de no max 128 * 10 000 bytes
+                struct pacote **packets = malloc(10000 * sizeof(struct pacote *));
+
+                uint8_t i = 0;
+                packets[i] = malloc(sizeof(struct pacote));
+
+                while (1) {
+                    // recebe pacotes
+                    recv(sock, packets[i], 131, 0);
+                    if (packets[i]->marcador == MARC){ // verifica marcador
+                        if (packets[i]->tipo == DADOS) {
+                            i++;
+                            packets[i] = malloc(sizeof(struct pacote));
+                        }
+                        if (packets[i]->tipo == FIM) {
+                            interpreta_pacotes_dados(packets, i, "arquivo.txt");
+                            printf("recebeuu!\n");
+                            break;
+                        }
+                    }
+                }
+
         }
         else {
             printf("erro ao enviar mensagem\n");

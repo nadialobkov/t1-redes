@@ -30,6 +30,11 @@
 #define SEM_PERM    0   // sem permissao de acesso
 #define SEM_ESP     1   // espaco insuficiente
 
+// tamanho do campo de dados
+#define TAM_MAX 127
+
+// valor marcador de inicio
+#define MARC 0x7e
 
 // ------------------------------------------------------------------------------------------------
 // ESTRUTURA
@@ -45,7 +50,7 @@ struct pacote {
     uint8_t checksum;   // 8 bits para checksum
 
     //dados
-    uint8_t dados[127]; // vetor de bytes de dados
+    uint8_t dados[TAM_MAX]; // vetor de bytes de dados
 };
 
 #pragma pack(pop); // restaura alinhamento padrao
@@ -70,5 +75,15 @@ unsigned int verifica_checksum(struct pacote *pack);
 char* devolve_extensao(char *caminho_arquivo);
 
 void exibe_arquivo(const char *caminho_arquivo);
+
+// Prepara um vetor de pacotes de dados que formam um arquivo para serem enviados sequencialmente
+// Retorno: vetor de pacotes
+struct pacote **prepara_pacotes_dados(const char *caminho);
+
+// Cria um arquivo no caminho indicado com os dados presentes no vetor de pacotes
+// Retorno: 0 em caso de sucesso e valores negativos em caso de erro
+uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const char *caminho);
+
+
 
 #endif
