@@ -44,8 +44,8 @@ int main() {
 
                 ssize_t i = 0;
                 printf("oi\n");
-                printf("%s\n", packets[i]->dados);
-                while (packets[i]->tipo == DADOS) { // nao sei se esta muito seguro
+                printf("%x\n", packets[i]->tipo);
+                while (packets[i]) { // nao sei se esta muito seguro
                     printf("enviando pacote %d", i);
                     send(sock, packets[i], 131, 0);
                     i++;
