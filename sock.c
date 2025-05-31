@@ -283,3 +283,60 @@ uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const cha
 
     return (0);
 }
+//----------------------------------------------------------------------------------------------
+
+//Atribui o tipo de ack ao pacote e devolve um pacote com a informação
+struct pacote* ack_format_arq(struct pacote *pack)
+{
+    //Cria um pacote que vai servir como mensagem ACK
+    struct pacote *ack = malloc(sizeof (struct pacote));
+
+    //Remove o possível \n do final do arquivo
+    unsigned int tamanho_string = strlen(pack->dados);
+    if (pack->dados[tamanho_string - 1]== '\n')
+        pack->dados[tamanho_string - 1] = '\0';
+
+    //Pega o formato do aqruivo
+    printf("dados = '%s'\n", pack->dados);
+    char *extensao = devolve_extensao(pack->dados);
+
+    printf("extensão = %s\n", extensao);
+
+    //Com base no formato do arquivo, atribui o tipo do ACK
+    if (strcmp(extensao, ".jpg") == 0)
+        ack->tipo = IMG;
+    else if (strcmp(extensao, '.mp4') == 0)
+        ack->tipo = VIDEO;
+    else
+        ack->tipo = TEXT;
+
+    //Coloca o nome do arquivo dentro do campo de dados do ack
+    for (int i = 0; i < pack->tam; i++)
+        ack->dados[i] = pack->dados[i];
+    
+    return ack;
+
+}
+
+//Verifica o pacote e econtra erros
+//OBS: Talvez não precisemos dessa função
+struct pacote* verifica_pacote(struct pacote *pack)
+{
+    struct pacote *mensagem = malloc(sizeof(struct pacote));
+
+    //Verifica checksum do pacote
+    unsigned int checksum = verifica_checksum(pack);
+    if (checksum == 0)
+    {
+        //Mensagem não chegou
+        mensagem->tipo = NACK;
+    }
+    else if (pack->marcador != 0x7e)
+    {
+        //Não achou o início
+        mensagem->tipo = ERRO;
+        mensagem->dados[0] = 2;         //código do erro
+    }
+
+    return mensagem;
+}

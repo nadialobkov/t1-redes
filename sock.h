@@ -29,6 +29,7 @@
 // codigos de erros
 #define SEM_PERM    0   // sem permissao de acesso
 #define SEM_ESP     1   // espaco insuficiente
+#define MARC_ERR0   2   // marcador de início errado
 
 // tamanho do campo de dados
 #define TAM_MAX 127
@@ -74,6 +75,7 @@ unsigned int verifica_checksum(struct pacote *pack);
 //Recebe um arquivo e retorna sua extensão
 char* devolve_extensao(char *caminho_arquivo);
 
+//Mostra o arquivo na tela
 void exibe_arquivo(const char *caminho_arquivo);
 
 // Prepara um vetor de pacotes de dados que formam um arquivo para serem enviados sequencialmente
@@ -83,6 +85,14 @@ struct pacote **prepara_pacotes_dados(const char *caminho);
 // Cria um arquivo no caminho indicado com os dados presentes no vetor de pacotes
 // Retorno: 0 em caso de sucesso e valores negativos em caso de erro
 uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const char *caminho);
+
+//Atribui o ack + formato do arquivo e coloca o nome dele no campo de dados
+//Retorno: um pacote que é a mensagem de ACK
+struct pacote* ack_format_arq(struct pacote *pack);
+
+//Trata os casos de ACK, NACK e ERRO
+//Retorno: os bytes enviados ou 0 em caso de ACK
+
 
 
 
