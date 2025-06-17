@@ -305,7 +305,7 @@ struct pacote* ack_format_arq(struct pacote *pack)
     //Com base no formato do arquivo, atribui o tipo do ACK
     if (strcmp(extensao, ".jpg") == 0)
         ack->tipo = IMG;
-    else if (strcmp(extensao, '.mp4') == 0)
+    else if (strcmp(extensao, ".mp4") == 0)
         ack->tipo = VIDEO;
     else
         ack->tipo = TEXT;

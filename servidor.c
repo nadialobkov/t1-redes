@@ -25,7 +25,7 @@ int main() {
             if (pack->marcador == 0x7e) {
                 //alterei um bit para testar se a função encontra o erro
                 //pack->dados[0] = pack->dados[0] ^ 0xFF;
-                /*
+                
                 int verificaChecksum = verifica_checksum(pack);
                 if (!verificaChecksum)
                 {
@@ -56,7 +56,7 @@ int main() {
                 send(sock, pack, 131, 0);
                     nack->tipo = NACK;
                     ssize_t envio_nack = send(sock, nack, 132, 0);
-                }*/
+                }
 
                 printf("recebido %ld bytes\n", tam);
                 printf("mensagem: %s\n", pack->dados);
@@ -66,7 +66,7 @@ int main() {
                 //Captura a extensão do arquivo
                 //char *extensao = devolve_extensao("foto_teste.jpg");
                 //printf("Extensão do teste: %s\n", extensao);
-                //exibe_arquivo("foto_teste.jpg");
+                exibe_arquivo("foto_teste.jpg");
                 struct pacote *ack = ack_format_arq(pack);      //é um tipo de ack + ok
                 printf("ack->tipo = %d\n", ack->tipo);
 
