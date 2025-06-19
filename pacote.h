@@ -42,7 +42,7 @@
 
 #pragma pack(push, 1) // evita otimizacao de alinhamento de bytes (garante pacote de 131 bytes)
 
-struct pacote {
+typedef struct pacote_t {
     // cabecalho do pacote
     uint8_t marcador;   // 8 bits para marcador de inicio
     uint8_t tam : 7;    // 7 bits para tamanho dos dados
@@ -52,7 +52,7 @@ struct pacote {
 
     //dados
     uint8_t dados[TAM_MAX]; // vetor de bytes de dados
-};
+} pacote_t;
 
 #pragma pack(pop); // restaura alinhamento padrao
 
@@ -60,5 +60,26 @@ struct pacote {
 // ==========================================================================================================
 
 // FUNCOES
+
+// retorna um pacote alocado dinamicamente com todos os campos vazios (zerados)
+pacote_t *cria_pacote();
+
+// libera espaco alocado pelo pacote
+void destroi_pacote(pacote_t *pack);
+
+
+// calcula a soma dos bits dos campos tamanho, sequência, tipo e dados
+//Guarda o valor no pacote
+void calcula_checksum(struct pacote *pack);
+
+// verifica se o checksum está correto (momento que recebe o pacote)
+// retorna 1 se estiver tudo certo e 0 se houver erro
+unsigned int verifica_checksum(struct pacote *pack);
+
+
+// escreve as informacoes passadas nos campos do pacote
+// a estrutura deve estar previamente alocada (nao aloca)
+// adiciona marcador de inicio e realiza checksum
+void escreve_pacote(pacote_t *pack, uint8_t tipo, uint8_t tam, uint8_t seq, uint8_t *dados) {
 
 #endif
