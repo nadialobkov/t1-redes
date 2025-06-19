@@ -31,9 +31,16 @@ uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const cha
 //Retorno: um pacote que é a mensagem de ACK
 struct pacote* ack_format_arq(struct pacote *pack);
 
-//Trata os casos de ACK, NACK e ERRO
-//Retorno: os bytes enviados ou 0 em caso de ACK
+//Calcula o checksum
+//Devolve erro em caso de falha no checksum
+//Devolve erro caso não encontre o marcador de início
+//Altera o campo interno do pacote
+//Retorno: void
+void verifica_pacote(struct pacote *pack, struct pacote *resposta_servidor);
 
+//Trata os casos de ACK, NACK e ERRO
+//Retorno: void (altera o campo interno do pacote)
+void trata_ack_nack_erro(struct pacote *resposta_servidor, struct pacote *pack, int sock, ssize_t envio);
 
 
 

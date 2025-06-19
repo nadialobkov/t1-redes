@@ -11,7 +11,7 @@ int main() {
 
     // criamos um socket com interface das maquinas virtuais
     int sock = cria_raw_socket("veth0");
-
+  
     // cria pacote para enviar mensagens
     pacote_t *pack_send = cria_pacote();
 
@@ -20,7 +20,6 @@ int main() {
     escreve_pacote(pack_send, DADOS, 4, 0, string);
 
     envia_pacote(sock, pack_send);
-
 
     destroi_pacote(pack_send);
     close(sock);

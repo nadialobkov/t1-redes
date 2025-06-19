@@ -139,8 +139,8 @@ void exibe_arquivo(const char *caminho_arquivo)
 
 // prepara vetor de pacotes com os dados a serem enviados
 // recebe caminho do arquivo
-
 // struct pacote **prepara_pacotes_dados(const char *caminho) {
+
 
 //     // usa estrutura stat para conseguir info do arquivo
 //     struct stat info;
@@ -266,6 +266,7 @@ void exibe_arquivo(const char *caminho_arquivo)
 //     for (int i = 0; i < pack->tam; i++)
 //         ack->dados[i] = pack->dados[i];
     
+
 //     return ack;
 
 // }
