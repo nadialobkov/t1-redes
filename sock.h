@@ -12,14 +12,6 @@
 // retorna file descriptor do socket
 int cria_raw_socket(char* nome_interface_rede);
 
-//Calcula a soma dos bits dos campos tamanho, sequência, tipo e dados
-//Guarda o valor no pacote
-void calcula_checksum(struct pacote *pack);
-
-//Verifica se o checksum está correto (momento que recebe o pacote)
-//Retorna 1 se estiver tudo certo e 0 se houver erro
-unsigned int verifica_checksum(struct pacote *pack);
-
 //Detecta o tipo dos dados (extensão)
 //Recebe um arquivo e retorna sua extensão
 char* devolve_extensao(char *caminho_arquivo);
