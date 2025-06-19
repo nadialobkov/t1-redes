@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 
 #include "sock.h"
+#include "pacote.h"
  
 
 // funcao de criacao de raw socket passada no enunciado do trabalho
@@ -49,55 +50,6 @@ int cria_raw_socket(char* nome_interface_rede) {
 }
 
 // ------------------------------------------------------------------------------------------------
-
-//Calcula checksum --------------------------------------------------------------------------------
-//Campos: tamanho + sequência + tipo + dados
-//OBS: Soma o campo dos dados somente até a quantidade indicada pelo tamanho
-void calcula_checksum(struct pacote *pack)
-{
-    unsigned int checksum;
-
-    checksum = pack->tam + pack->seq + pack->tipo;
-
-    //Soma os dados escritos
-    for (int i = 0; i < pack->tam; i++)
-        checksum += pack->dados[i];
-
-    //Garante que o valor vai ter 8 bits 
-    //Pega os 8 bits menos significativos
-    //checksum AND 11111111 (por isso mantém somente os 8 bits menos significativos ligados)
-    checksum = checksum & 0xFF;
-
-    //Escreve o valor no campo especificado
-    pack->checksum = checksum;
-
-}
-//-------------------------------------------------------------------------------------------------
-
-//Verifica o campo do checksum da mensagem recebida -----------------------------------------------
-//*pack é a mensagem recebida
-unsigned int verifica_checksum(struct pacote *pack)
-{
-    unsigned int checksum_original;
-
-    //Armazena o valor inicial do checksum
-    checksum_original = pack->checksum;
-
-    //Zera temporariamente (para não interferir no cálculo)
-    pack->checksum = 0;
-
-    //Calcula o checksum da mensagem recebida
-    calcula_checksum(pack);
-
-    //Se não forem iguais, houve erro
-    if (checksum_original != pack->checksum)
-        return 0;
-    
-    printf("Checksum OK!\n");
-
-    return 1;
-}
-//-------------------------------------------------------------------------------------------------
 
 //Detecta a extensão dos dados --------------------------------------------------------------------
 char* devolve_extensao(char *caminho_arquivo)
@@ -188,155 +140,155 @@ void exibe_arquivo(const char *caminho_arquivo)
 // prepara vetor de pacotes com os dados a serem enviados
 // recebe caminho do arquivo
 
-struct pacote **prepara_pacotes_dados(const char *caminho) {
+// struct pacote **prepara_pacotes_dados(const char *caminho) {
 
-    // usa estrutura stat para conseguir info do arquivo
-    struct stat info;
+//     // usa estrutura stat para conseguir info do arquivo
+//     struct stat info;
 
-    if(stat(caminho, &info) == -1) {
-        perror("Erro ao obter informações do arquivo");
-        return (NULL);
-    }
-    // obtem tamanho do arquivo
-    size_t tamanho = info.st_size;
+//     if(stat(caminho, &info) == -1) {
+//         perror("Erro ao obter informações do arquivo");
+//         return (NULL);
+//     }
+//     // obtem tamanho do arquivo
+//     size_t tamanho = info.st_size;
 
-    // abre o arquivo
-    FILE *arquivo = fopen(caminho, "r");
-    if (!arquivo) {
-        perror("Erro ao abrir arquivo");
-        return (NULL);
-    }
-    fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
+//     // abre o arquivo
+//     FILE *arquivo = fopen(caminho, "r");
+//     if (!arquivo) {
+//         perror("Erro ao abrir arquivo");
+//         return (NULL);
+//     }
+//     fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
 
-    // descobre quantos pacotes serao necessarios para enviar todo o arquivo
-    size_t num = (tamanho / TAM_MAX) + 1; // teto
+//     // descobre quantos pacotes serao necessarios para enviar todo o arquivo
+//     size_t num = (tamanho / TAM_MAX) + 1; // teto
 
-    // cria vetor de pacotes
-    struct pacote **packets = malloc(num * sizeof(struct pacote *));
-    if (!packets) {
-        perror("Erro ao criar vetor de pacotes");
-        return (-2);
-    }
+//     // cria vetor de pacotes
+//     struct pacote **packets = malloc(num * sizeof(struct pacote *));
+//     if (!packets) {
+//         perror("Erro ao criar vetor de pacotes");
+//         return (-2);
+//     }
 
-    printf("tamanho arquivo: %d\n", tamanho);
-    printf("num: %d\n", num);
+//     printf("tamanho arquivo: %d\n", tamanho);
+//     printf("num: %d\n", num);
 
 
-    // cria pacotes com os pedaços de dados do arquivo
-    // inicializa campos da estrutura
-    for (size_t i = 0; i < num; i++) {
+//     // cria pacotes com os pedaços de dados do arquivo
+//     // inicializa campos da estrutura
+//     for (size_t i = 0; i < num; i++) {
 
-        printf("i: %d\n", i);
+//         printf("i: %d\n", i);
 
-        packets[i] = malloc(sizeof(struct pacote));
-        if (!packets[i]) {
-            perror("Erro ao criar pacote de transmissao de dados");
-            return (-3);
-        }
+//         packets[i] = malloc(sizeof(struct pacote));
+//         if (!packets[i]) {
+//             perror("Erro ao criar pacote de transmissao de dados");
+//             return (-3);
+//         }
 
-        packets[i]->marcador = MARC;
-        packets[i]->seq = i % 32;
-        packets[i]->tipo = DADOS;
+//         packets[i]->marcador = MARC;
+//         packets[i]->seq = i % 32;
+//         packets[i]->tipo = DADOS;
 
-        size_t bytes_lidos = fread(packets[i]->dados, 1, TAM_MAX, arquivo);
-        printf("leu tantos bytes: %d\n", bytes_lidos);
-        printf("leu: %s\n", packets[i]->dados);
+//         size_t bytes_lidos = fread(packets[i]->dados, 1, TAM_MAX, arquivo);
+//         printf("leu tantos bytes: %d\n", bytes_lidos);
+//         printf("leu: %s\n", packets[i]->dados);
 
-        packets[i]->tam = bytes_lidos; 
+//         packets[i]->tam = bytes_lidos; 
 
-        calcula_checksum(packets[i]);
-    }
+//         calcula_checksum(packets[i]);
+//     }
 
-    printf("saiu laco\n");
+//     printf("saiu laco\n");
 
-    fclose(arquivo);
+//     fclose(arquivo);
 
-    return (packets); 
-}
-//------------------------------------------------------------------------------------------------------------------
+//     return (packets); 
+// }
+// //------------------------------------------------------------------------------------------------------------------
 
-// recebe um vetor de pacotes contendo dados separados sequencialmente
-// escreve o arquivo no caminho passado 
-// retorna 0 em caso de sucesso e valores negativos em caso de erro
+// // recebe um vetor de pacotes contendo dados separados sequencialmente
+// // escreve o arquivo no caminho passado 
+// // retorna 0 em caso de sucesso e valores negativos em caso de erro
 
-uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const char *caminho) {
+// uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const char *caminho) {
 
-    // cria o arquivo para copiar os dados do pacote
-    FILE *arquivo = fopen(caminho, "w");
-    if (!arquivo) {
-        perror("Erro ao criar arquivo");
-        return (NULL);
-    }
-    fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
+//     // cria o arquivo para copiar os dados do pacote
+//     FILE *arquivo = fopen(caminho, "w");
+//     if (!arquivo) {
+//         perror("Erro ao criar arquivo");
+//         return (NULL);
+//     }
+//     fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
 
-    if (!packets) {
-        perror("Erro: vetor de pacotes inválido");
-        return (-1);
-    }
+//     if (!packets) {
+//         perror("Erro: vetor de pacotes inválido");
+//         return (-1);
+//     }
 
-    // vamos percorres os pacotes escrever os dados no arquivo
-    for (uint8_t i = 0; i < tam; i++) {
-        fputs(packets[i]->dados, arquivo);
-    }
+//     // vamos percorres os pacotes escrever os dados no arquivo
+//     for (uint8_t i = 0; i < tam; i++) {
+//         fputs(packets[i]->dados, arquivo);
+//     }
 
-    fclose(arquivo);
+//     fclose(arquivo);
 
-    return (0);
-}
-//----------------------------------------------------------------------------------------------
+//     return (0);
+// }
+// //----------------------------------------------------------------------------------------------
 
-//Atribui o tipo de ack ao pacote e devolve um pacote com a informação
-struct pacote* ack_format_arq(struct pacote *pack)
-{
-    //Cria um pacote que vai servir como mensagem ACK
-    struct pacote *ack = malloc(sizeof (struct pacote));
+// //Atribui o tipo de ack ao pacote e devolve um pacote com a informação
+// struct pacote* ack_format_arq(struct pacote *pack)
+// {
+//     //Cria um pacote que vai servir como mensagem ACK
+//     struct pacote *ack = malloc(sizeof (struct pacote));
 
-    //Remove o possível \n do final do arquivo
-    unsigned int tamanho_string = strlen(pack->dados);
-    if (pack->dados[tamanho_string - 1]== '\n')
-        pack->dados[tamanho_string - 1] = '\0';
+//     //Remove o possível \n do final do arquivo
+//     unsigned int tamanho_string = strlen(pack->dados);
+//     if (pack->dados[tamanho_string - 1]== '\n')
+//         pack->dados[tamanho_string - 1] = '\0';
 
-    //Pega o formato do aqruivo
-    printf("dados = '%s'\n", pack->dados);
-    char *extensao = devolve_extensao(pack->dados);
+//     //Pega o formato do aqruivo
+//     printf("dados = '%s'\n", pack->dados);
+//     char *extensao = devolve_extensao(pack->dados);
 
-    printf("extensão = %s\n", extensao);
+//     printf("extensão = %s\n", extensao);
 
-    //Com base no formato do arquivo, atribui o tipo do ACK
-    if (strcmp(extensao, ".jpg") == 0)
-        ack->tipo = IMG;
-    else if (strcmp(extensao, ".mp4") == 0)
-        ack->tipo = VIDEO;
-    else
-        ack->tipo = TEXT;
+//     //Com base no formato do arquivo, atribui o tipo do ACK
+//     if (strcmp(extensao, ".jpg") == 0)
+//         ack->tipo = IMG;
+//     else if (strcmp(extensao, ".mp4") == 0)
+//         ack->tipo = VIDEO;
+//     else
+//         ack->tipo = TEXT;
 
-    //Coloca o nome do arquivo dentro do campo de dados do ack
-    for (int i = 0; i < pack->tam; i++)
-        ack->dados[i] = pack->dados[i];
+//     //Coloca o nome do arquivo dentro do campo de dados do ack
+//     for (int i = 0; i < pack->tam; i++)
+//         ack->dados[i] = pack->dados[i];
     
-    return ack;
+//     return ack;
 
-}
+// }
 
-//Verifica o pacote e econtra erros
-//OBS: Talvez não precisemos dessa função
-struct pacote* verifica_pacote(struct pacote *pack)
-{
-    struct pacote *mensagem = malloc(sizeof(struct pacote));
+// //Verifica o pacote e econtra erros
+// //OBS: Talvez não precisemos dessa função
+// struct pacote* verifica_pacote(struct pacote *pack)
+// {
+//     struct pacote *mensagem = malloc(sizeof(struct pacote));
 
-    //Verifica checksum do pacote
-    unsigned int checksum = verifica_checksum(pack);
-    if (checksum == 0)
-    {
-        //Mensagem não chegou
-        mensagem->tipo = NACK;
-    }
-    else if (pack->marcador != 0x7e)
-    {
-        //Não achou o início
-        mensagem->tipo = ERRO;
-        mensagem->dados[0] = 2;         //código do erro
-    }
+//     //Verifica checksum do pacote
+//     unsigned int checksum = verifica_checksum(pack);
+//     if (checksum == 0)
+//     {
+//         //Mensagem não chegou
+//         mensagem->tipo = NACK;
+//     }
+//     else if (pack->marcador != 0x7e)
+//     {
+//         //Não achou o início
+//         mensagem->tipo = ERRO;
+//         mensagem->dados[0] = 2;         //código do erro
+//     }
 
-    return mensagem;
-}
+//     return mensagem;
+// }

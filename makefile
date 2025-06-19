@@ -5,8 +5,8 @@ CFLAGS = -Wall -Wextra -g
 SERVER_EXEC = servidor
 CLIENT_EXEC = cliente
 
-SERVER_SRC = servidor.c sock.o
-CLIENT_SRC = cliente.c sock.o
+SERVER_SRC = servidor.c sock.o pacote.o
+CLIENT_SRC = cliente.c sock.o pacote.o
 
 .PHONY: all clean clean_cliente
 
