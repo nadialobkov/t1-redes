@@ -31,6 +31,11 @@
 #define SEM_ESP     1   // espaco insuficiente
 #define MARC_ERR0   2   // marcador de início errado
 
+// tamanho do campo de dados
+#define TAM_MAX 127
+
+// valor marcador de inicio
+#define MARC 0x7e
 
 // ------------------------------------------------------------------------------------------------
 // ESTRUTURA
@@ -46,7 +51,7 @@ struct pacote {
     uint8_t checksum;   // 8 bits para checksum
 
     //dados
-    uint8_t dados[127]; // vetor de bytes de dados
+    uint8_t dados[TAM_MAX]; // vetor de bytes de dados
 };
 
 #pragma pack(pop); // restaura alinhamento padrao
@@ -72,6 +77,14 @@ char* devolve_extensao(char *caminho_arquivo);
 
 //Mostra o arquivo na tela
 void exibe_arquivo(const char *caminho_arquivo);
+
+// Prepara um vetor de pacotes de dados que formam um arquivo para serem enviados sequencialmente
+// Retorno: vetor de pacotes
+struct pacote **prepara_pacotes_dados(const char *caminho);
+
+// Cria um arquivo no caminho indicado com os dados presentes no vetor de pacotes
+// Retorno: 0 em caso de sucesso e valores negativos em caso de erro
+uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const char *caminho);
 
 //Atribui o ack + formato do arquivo e coloca o nome dele no campo de dados
 //Retorno: um pacote que é a mensagem de ACK
