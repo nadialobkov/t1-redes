@@ -8,7 +8,7 @@ CLIENT_EXEC = cliente
 SERVER_SRC = servidor.c sock.o
 CLIENT_SRC = cliente.c sock.o
 
-.PHONY: all clean
+.PHONY: all clean clean_cliente
 
 # regra para compilar tudo
 all: $(SERVER_EXEC) $(CLIENT_EXEC)
@@ -27,3 +27,6 @@ $(CLIENT_EXEC): $(CLIENT_SRC)
 # limpar arquivos objeto e executáveis
 clean:
 	rm -f *.o $(SERVER_EXEC) $(CLIENT_EXEC)
+
+clean_cliente:
+	rm -rf arq_cliente/*

@@ -10,7 +10,7 @@ Implementação do Trabalho 1 da disciplina de Redes de Computadores 1 (2025/1)
 
 1. Para compilar tudo
 
-    >make
+    > make
 
 2. Para compilar apenas o servidor
 
@@ -23,6 +23,10 @@ Implementação do Trabalho 1 da disciplina de Redes de Computadores 1 (2025/1)
 4. Para limpar os arquivos gerados
 
     > make clean
+
+5. Para limpar os arquivos salvos na pasta do cliente
+
+    > make clean_cliente
 
 ### 💻 Execução do Programa
 
