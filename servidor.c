@@ -49,21 +49,25 @@ int main() {
                 printf("%x\n", packets[i]->tipo);
                 while (packets[i]) { // nao sei se esta muito seguro
                     //printf("enviando pacote %d", i);
-                    //verifica_pacote(packets[i], resposta_servidor);
-                    //printf("resposta_servidor[%d]->tipo = %d\n", i, resposta_servidor->tipo);
-                    //ssize_t envio_ack = send(sock, resposta_servidor, 132, 0);
-                    send(sock, packets[i], 131, 0);
-                    i++;
-                    printf("i = %d\n", i);
+                    if (i <= 130)
+                    {
+                        verifica_pacote(packets[i], resposta_servidor);
+                        printf("resposta_servidor[%d]->tipo = %d\n", i, resposta_servidor->tipo);
+                        ssize_t envio_ack = send(sock, resposta_servidor, 131, 0);
+                    
+                        send(sock, packets[i], 131, 0);
+                        i++;
+                        printf("i = %d\n", i);
+                    }
                 }
                 pack->tipo = FIM;
                 send(sock, pack, 131, 0);
 
                 //exibe_arquivo("foto_teste.jpg");
-                //verifica_pacote(pack, resposta_servidor);
-                //printf("resposta_servidor->tipo = %d\n", resposta_servidor->tipo);
+                verifica_pacote(pack, resposta_servidor);
+                printf("resposta_servidor->tipo = %d\n", resposta_servidor->tipo);
                 
-                //ssize_t envio_ack = send(sock, resposta_servidor, 132, 0);
+                ssize_t envio_ack = send(sock, resposta_servidor, 132, 0);
             }
         }
     }

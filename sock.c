@@ -80,6 +80,9 @@ unsigned int verifica_checksum(struct pacote *pack)
 {
     unsigned int checksum_original;
 
+    if (!pack)
+        return 0;               //é lixo
+
     //Armazena o valor inicial do checksum
     checksum_original = pack->checksum;
 

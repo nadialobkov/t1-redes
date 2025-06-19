@@ -37,7 +37,7 @@ int main() {
         printf("esta eh a mensagem que voce enviou: %s\n", pack->dados);
 
         //Ainda precisa tratar se recebeu ack, nack ou erro 
-        ssize_t envio = send(sock, pack, 132, 0);
+        ssize_t envio = send(sock, pack, 131, 0);
         if (envio >= 0) {
             printf("%d bytes enviados\n", envio);
 
@@ -52,16 +52,16 @@ int main() {
                     printf("recebendo pacotes\n");
                     recv(sock, packets[i], 131, 0);
                     printf("indo testar marcador\n");
-                    printf("marcador = %d\n", packets[i]->marcador);
+                    printf("marcador[%d] = %d\n", i, packets[i]->marcador);
                     if (packets[i]->marcador == MARC){ // verifica marcador
                         printf("testando marcador\n");
                         if (packets[i]->tipo == DADOS) {
-                            printf("pacote dados\n");
+                            //printf("pacote dados\n");
                             i++;
                             packets[i] = malloc(sizeof(struct pacote));
                         }
                         if (packets[i]->tipo == FIM) {
-                            printf("último pacote\n");
+                            //printf("último pacote\n");
                             interpreta_pacotes_dados(packets, i, "arquivo.txt");
                             printf("recebeuu!\n");
                             break;
