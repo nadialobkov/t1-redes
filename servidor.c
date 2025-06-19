@@ -56,9 +56,9 @@ int main() {
                         ssize_t envio_ack = send(sock, resposta_servidor, 131, 0);
                     
                         send(sock, packets[i], 131, 0);
-                        i++;
                         printf("i = %d\n", i);
                     }
+                    ++i;
                 }
                 pack->tipo = FIM;
                 send(sock, pack, 131, 0);
