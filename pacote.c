@@ -97,6 +97,11 @@ unsigned int verifica_checksum(pacote_t *pack)
 // prepara a mensagem adicionando marcador de inicio e checksum
 void escreve_pacote(pacote_t *pack, uint8_t tipo, uint8_t tam, uint8_t seq, uint8_t *dados) {
 
+    if (!pack) {
+        perror("Não foi possível escrever no pacote");
+        return;
+    }
+
     // limpa pacote
     memset(pack, 0, sizeof(pacote_t));
 
@@ -113,6 +118,45 @@ void escreve_pacote(pacote_t *pack, uint8_t tipo, uint8_t tam, uint8_t seq, uint
     }
 
     calcula_checksum(pack);
+
+    return;
+}
+
+// envia a mensagem escrita no pacote atraves do socket informado
+void envia_pacote(int sock, pacote_t *pack) {
+
+    if (!pack) {
+        perror("Não foi possível enviar esse pacote");
+        return;
+    }
+
+    // envia mensagem
+    int ret = send(sock, pack, TAM_PAC, 0);
+
+    // verifica retorno do send
+    if (ret < 0) {
+        perror("Erro ao enviar mensagem");
+    }
+
+    return;
+}
+
+// espera pacotes e verifica marcador de inicio
+// escreve em 'pack' o pacote recebido
+void recebe_pacote(int sock, pacote_t *pack) {
+
+    int bytes_lidos = 0;
+    uint8_t marc = 0;
+
+    // enquanto nao for o marcador de inicio
+    while (marc != MARC) {
+        // vai ficar esperando mensagens ate receber algo
+        do {
+            bytes_lidos = recv(sock, pack, TAM_PAC, 0);
+        } while (bytes_lidos <= 0);
+
+        marc = pack->marcador;
+    }
 
     return;
 }
