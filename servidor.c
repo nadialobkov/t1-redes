@@ -26,10 +26,9 @@ int main() {
             if (pack->marcador == 0x7e) {
                 //alterei um bit para testar se a função encontra o erro
                 //pack->dados[0] = pack->dados[0] ^ 0xFF;
-                
+
                 int verificaChecksum = verifica_checksum(pack);
                 if (!verificaChecksum)
-                {
                     printf("ERRO NO CHECKSUM\n");
                 
 
@@ -49,35 +48,23 @@ int main() {
                 printf("oi\n");
                 printf("%x\n", packets[i]->tipo);
                 while (packets[i]) { // nao sei se esta muito seguro
-                    printf("enviando pacote %d", i);
+                    //printf("enviando pacote %d", i);
+                    //verifica_pacote(packets[i], resposta_servidor);
+                    //printf("resposta_servidor[%d]->tipo = %d\n", i, resposta_servidor->tipo);
+                    //ssize_t envio_ack = send(sock, resposta_servidor, 132, 0);
                     send(sock, packets[i], 131, 0);
                     i++;
+                    printf("i = %d\n", i);
                 }
                 pack->tipo = FIM;
                 send(sock, pack, 131, 0);
-                    nack->tipo = NACK;
-                    ssize_t envio_nack = send(sock, nack, 132, 0);
-                }
 
-                printf("recebido %ld bytes\n", tam);
-                printf("mensagem: %s\n", pack->dados);
-                printf("tipo = %d\n", pack->tipo);
+                //exibe_arquivo("foto_teste.jpg");
+                //verifica_pacote(pack, resposta_servidor);
+                //printf("resposta_servidor->tipo = %d\n", resposta_servidor->tipo);
                 
-                //Teste
-                //Captura a extensão do arquivo
-                //char *extensao = devolve_extensao("foto_teste.jpg");
-                //printf("Extensão do teste: %s\n", extensao);
-                exibe_arquivo("foto_teste.jpg");
-                verifica_pacote(pack, resposta_servidor);      //é um tipo de ack + ok
-                printf("resposta_servidor->tipo = %d\n", resposta_servidor->tipo);
-
-                ssize_t envio_ack = send(sock, resposta_servidor, 132, 0);
-                //se o ack não chegar tratar no timeout
+                //ssize_t envio_ack = send(sock, resposta_servidor, 132, 0);
             }
-        }
-        else
-        {
-            //A mensagem não chegou
         }
     }
 

@@ -193,6 +193,8 @@ struct pacote **prepara_pacotes_dados(const char *caminho) {
     // usa estrutura stat para conseguir info do arquivo
     struct stat info;
 
+    printf("entrei na prepara_pacotes_dados\n");
+
     if(stat(caminho, &info) == -1) {
         perror("Erro ao obter informações do arquivo");
         return (NULL);
@@ -322,6 +324,8 @@ struct pacote* ack_format_arq(struct pacote *pack)
 //OBS: Talvez não precisemos dessa função
 void verifica_pacote(struct pacote *pack, struct pacote *resposta_servidor)
 {
+    printf("entrei na verifica pacote\n");
+    
     unsigned int checksum = verifica_checksum(pack);
  
     if (checksum == 0)
@@ -332,6 +336,10 @@ void verifica_pacote(struct pacote *pack, struct pacote *resposta_servidor)
     {
         resposta_servidor->tipo = ERRO;
         resposta_servidor->dados[0] = 2;     //código do erro
+    }
+    else if ((pack->marcador == MARC) && checksum)
+    {
+        resposta_servidor->tipo = ACK;
     }
 }
 
