@@ -14,6 +14,7 @@ int main() {
     struct pacote *pack = malloc(sizeof(struct pacote));
     printf("%ld\n", sizeof(struct pacote));
     struct pacote *nack = malloc(sizeof(struct pacote));
+    struct pacote *resposta_servidor = malloc(sizeof(struct pacote));
 
     // vamos fazer um loop para ficar esperando mensagens
     while (1) {
@@ -67,10 +68,10 @@ int main() {
                 //char *extensao = devolve_extensao("foto_teste.jpg");
                 //printf("Extensão do teste: %s\n", extensao);
                 exibe_arquivo("foto_teste.jpg");
-                struct pacote *ack = ack_format_arq(pack);      //é um tipo de ack + ok
-                printf("ack->tipo = %d\n", ack->tipo);
+                verifica_pacote(pack, resposta_servidor);      //é um tipo de ack + ok
+                printf("resposta_servidor->tipo = %d\n", resposta_servidor->tipo);
 
-                ssize_t envio_ack = send(sock, ack, 132, 0);
+                ssize_t envio_ack = send(sock, resposta_servidor, 132, 0);
                 //se o ack não chegar tratar no timeout
             }
         }

@@ -320,23 +320,57 @@ struct pacote* ack_format_arq(struct pacote *pack)
 
 //Verifica o pacote e econtra erros
 //OBS: Talvez não precisemos dessa função
-struct pacote* verifica_pacote(struct pacote *pack)
+void verifica_pacote(struct pacote *pack, struct pacote *resposta_servidor)
 {
-    struct pacote *mensagem = malloc(sizeof(struct pacote));
-
-    //Verifica checksum do pacote
     unsigned int checksum = verifica_checksum(pack);
+ 
     if (checksum == 0)
     {
-        //Mensagem não chegou
-        mensagem->tipo = NACK;
+        resposta_servidor->tipo = NACK;
     }
     else if (pack->marcador != 0x7e)
     {
-        //Não achou o início
-        mensagem->tipo = ERRO;
-        mensagem->dados[0] = 2;         //código do erro
+        resposta_servidor->tipo = ERRO;
+        resposta_servidor->dados[0] = 2;     //código do erro
+    }
+}
+
+//Trata os casos de ACK, NACK e ERRO
+//Retorno: void (altera os campos internos do pacote)
+//Recebe: o pacote que foi enviado, o socket e o tamanho dos dados enviados
+void trata_ack_nack_erro(struct pacote *resposta_servidor, struct pacote *pack, int sock, ssize_t envio)
+{
+    ssize_t ack_recebido = recv(sock, resposta_servidor, 132, 0);
+ 
+    if (ack_recebido > 0)
+    {
+        printf("recebi o ack/nack do servidor\n");
+        if (resposta_servidor->tipo == NACK)
+        {
+            //tratar (enviar novamente)
+            envio = send(sock, pack, 132, 0);
+            if (envio <= 0)
+                printf("Erro ao enviar mensagem.\n");
+        }
+        else if (resposta_servidor->tipo == ERRO)
+        {
+            //tratar
+        }
+        else if (resposta_servidor->tipo == ACK)
+        {
+            printf("ACK\n");
+        }
+        else
+        {
+            //mensagem recebida e processada, então podemos enviar as próximas
+            //
+        }
+    }
+    else
+    {
+        //(a mensaagem de resposta foi perdida)
+        //
     }
 
-    return mensagem;
+    free(resposta_servidor);
 }

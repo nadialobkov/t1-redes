@@ -12,6 +12,7 @@ int main() {
     int sock = cria_raw_socket("veth0");
 
     struct pacote *pack = malloc(sizeof(struct pacote));
+    struct pacote *resposta_servidor = malloc(sizeof(struct pacote));
 
     // cliente vai enviar mensagens
     while (1) {
@@ -48,13 +49,19 @@ int main() {
 
                 while (1) {
                     // recebe pacotes
+                    printf("recebendo pacotes\n");
                     recv(sock, packets[i], 131, 0);
+                    printf("indo testar marcador\n");
+                    printf("marcador = %d\n", packets[i]->marcador);
                     if (packets[i]->marcador == MARC){ // verifica marcador
+                        printf("testando marcador\n");
                         if (packets[i]->tipo == DADOS) {
+                            printf("pacote dados\n");
                             i++;
                             packets[i] = malloc(sizeof(struct pacote));
                         }
                         if (packets[i]->tipo == FIM) {
+                            printf("último pacote\n");
                             interpreta_pacotes_dados(packets, i, "arquivo.txt");
                             printf("recebeuu!\n");
                             break;
@@ -66,37 +73,9 @@ int main() {
         else {
             printf("erro ao enviar mensagem\n");
         }
-        struct pacote *ack = malloc(sizeof(struct pacote));
-        ssize_t ack_recebido = recv(sock, ack, 132, 0);
-        //colocar em uma função
-        if (ack_recebido > 0)
-        {
-            if (ack->tipo == NACK)
-            {
-                //tratar (enviar novamente)
-                envio = send(sock, pack, 132, 0);
-                if (envio <= 0)
-                    printf("Erro ao enviar mensagem.\n");
-            }
-            else if (ack->tipo == ERRO)
-            {
-                //tratar
-            }
-            else if (ack->tipo == ACK)
-            {
-                //espera o ack + ok
-            }
-            else
-            {
-                //mensagem recebida e processada, então podemos enviar as próximas
-                continue;
-            }
-        }
-        else
-        {
-            //devemos enviar novamente (a mensaagem de resposta foi perdida)
-            //
-        }
+        
+        printf("vou entrar no if dos tipos de mensagem\n");
+        trata_ack_nack_erro(resposta_servidor, pack, sock, envio);
     }
 
     close(sock);
