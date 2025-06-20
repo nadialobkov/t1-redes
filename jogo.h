@@ -50,5 +50,9 @@ void imprime_tabuleiro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador)
 //(A ideia é colocar o campo dos dados na direção)
 unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador, unsigned int direcao);
 
+//Trata o caso do jogador encontrar um tesouro
+//Retorno: 1 caso encontrou o tesouro e 0 caso contrário
+unsigned int encontrou_tesouro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador);
+
 
 #endif
