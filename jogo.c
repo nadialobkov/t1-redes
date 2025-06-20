@@ -86,6 +86,8 @@ struct jogador_t* cria_jogador()
 
 void imprime_tabuleiro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador)
 {
+    printf("                 ⚔️ C𝕒ç𝕒 𝕒𝕠 𝕋𝕖𝕤𝕠𝕦𝕣𝕠⚔️\n");
+    printf("⚔️ 💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠⚔️\n");
     for (int k = 7; k >= 0; k--)
     {
         //Topo dos quadradinhos
@@ -112,12 +114,11 @@ void imprime_tabuleiro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador)
             printf("└────┘ ");
         printf("\n");
     }
+    printf("⚔️ 💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠⚔️\n");
 }
 
 unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador, unsigned int direcao)
 {
-    printf("jogador->pox_x = %d\n", jogador->pos_x);
-
     switch (direcao)
     {
         //Direita
