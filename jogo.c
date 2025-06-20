@@ -1,5 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <termios.h>
 //#include <time.h>         //depois de pronto, para ter tesouros em posições diferentes a cada jogada
 #include "jogo.h"
  
@@ -107,12 +110,59 @@ void imprime_tabuleiro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador)
     printf("⚔️ 💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠⚔️\n");
 }
 
+void desativa_modo_canonico(struct termios *old)
+{
+    struct termios nova;
+
+    //Lê as configurações atuais do terminal e salva
+    tcgetattr(STDIN_FILENO, old);
+    nova = *old;
+
+    //Entra em modo não canônico e o que é digitado não é ecoado na tela
+    //Junta os bits das flags em um or bit a bit
+    //Inverte todos os bits do resultado com ~
+    //Faz um and bit a bit e grava o resultado (zera os bits de ICANON e ECHO, mas preserva os outros)
+    nova.c_lflag &= ~(ICANON | ECHO);
+
+    //Altera o comportamento do terminal para a nova configuração
+    tcsetattr(STDIN_FILENO, TCSANOW, &nova);
+}
+
+void restaura_canonico(struct termios *old)
+{
+    tcsetattr(STDIN_FILENO, TCSANOW, old);
+}
+
+unsigned int le_movimento()
+{
+    char direcao[4] = {0};               //3 bytes para a direção + \0
+    struct termios velha_configuracao;
+
+    desativa_modo_canonico(&velha_configuracao);
+
+    //Lê 1 byte três vezes (as setas tem 3 bytes cada)
+    fread(direcao, 1, 3, stdin);
+
+    if (strcmp(direcao, "\x1b[A") == 0)
+        return CIMA;
+    else if (strcmp(direcao, "\x1b[B") == 0)
+        return BAIXO;
+    else if (strcmp(direcao, "\x1b[C") == 0)
+        return DIREITA;
+    else if (strcmp(direcao, "\x1b[D") == 0)
+        return ESQUERDA;
+    else
+        return 0;   //Movimento Inválido - Não pressionou uma seta
+
+    restaura_canonico(&velha_configuracao);
+}
+
 unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador, unsigned int direcao)
 {
     switch (direcao)
     {
         //Direita
-        case 10:
+        case DIREITA:
             if (jogador->pos_x == 7)
                 return 0;                   //Não é possível movimentar
             
@@ -120,7 +170,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *
             break;
 
         //Cima
-        case 11:
+        case CIMA:
             if (jogador->pos_y == 7)
                 return 0;                   //Não é possível movimentar
             
@@ -128,7 +178,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *
             break;
 
         //Baixo
-        case 12:
+        case BAIXO:
             if (jogador->pos_y == 0)
                 return 0;                   //Não é possível movimentar
             
@@ -136,7 +186,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *
             break;
 
         //Esquerda
-        case 13:
+        case ESQUERDA:
             if (jogador->pos_x == 0)
                 return 0;                   //Não é possível movimentar
             
@@ -168,6 +218,9 @@ unsigned int encontrou_tesouro(struct tabuleiro_t *tabuleiro, struct jogador_t *
         
         return 1;
     }
+
+    if (tabuleiro->posicoes[jogador->pos_x][jogador->pos_y] == COM_TESOURO_VISITADA)
+        return 0;       //Porque já tem o tesouro, então não encontrou nada novo
 
     tabuleiro->posicoes[jogador->pos_x][jogador->pos_y] = SEM_TESOURO_VISITADA;
 
