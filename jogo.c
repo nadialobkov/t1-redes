@@ -73,6 +73,8 @@ struct jogador_t* cria_jogador()
     //Zera o bitmap dos tesouros encontrados (não tem nenhum ainda)
     for (int i = 0; i < 7; i++)
         jogador->tesouros[i] = 0;
+
+    jogador->casas_percorridas = 1;     //Não é zero por que ele já nasce em uma casa
     
     return jogador;
 }
@@ -140,8 +142,25 @@ unsigned int le_movimento()
 
     desativa_modo_canonico(&velha_configuracao);
 
-    //Lê 1 byte três vezes (as setas tem 3 bytes cada)
-    fread(direcao, 1, 3, stdin);
+    // Lê o primeiro byte
+    if (read(STDIN_FILENO, &direcao[0], 1) < 1) {
+        restaura_canonico(&velha_configuracao);
+        return 0;
+    }
+
+    // Se for ESC (27), tenta ler os dois próximos
+    if (direcao[0] == '\x1b') {
+        read(STDIN_FILENO, &direcao[1], 1);  // Espera '['
+        read(STDIN_FILENO, &direcao[2], 1);  // Espera A/B/C/D
+    }
+
+    restaura_canonico(&velha_configuracao);
+
+    // if (direcao[0] != '\x1b')
+    // {
+    //     printf("Tecla Inválida!\n");
+    //     return 0;   //Movimento Inválido - Não pressionou uma seta
+    // }        
 
     if (strcmp(direcao, "\x1b[A") == 0)
         return CIMA;
@@ -152,9 +171,10 @@ unsigned int le_movimento()
     else if (strcmp(direcao, "\x1b[D") == 0)
         return ESQUERDA;
     else
+    {
+        printf("Tecla Inválida!\n");
         return 0;   //Movimento Inválido - Não pressionou uma seta
-
-    restaura_canonico(&velha_configuracao);
+    }
 }
 
 unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador, unsigned int direcao)
@@ -167,6 +187,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *
                 return 0;                   //Não é possível movimentar
             
             jogador->pos_x++;
+            jogador->casas_percorridas++;
             break;
 
         //Cima
@@ -175,6 +196,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *
                 return 0;                   //Não é possível movimentar
             
             jogador->pos_y++;
+            jogador->casas_percorridas++;
             break;
 
         //Baixo
@@ -183,6 +205,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *
                 return 0;                   //Não é possível movimentar
             
             jogador->pos_y--;
+            jogador->casas_percorridas++;
             break;
 
         //Esquerda
@@ -191,6 +214,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *
                 return 0;                   //Não é possível movimentar
             
             jogador->pos_x--;
+            jogador->casas_percorridas++;
             break;
     }
 
@@ -213,7 +237,6 @@ unsigned int encontrou_tesouro(struct tabuleiro_t *tabuleiro, struct jogador_t *
         jogador->tesouros[i] = 1;
 
         //Atualiza o tabuleiro
-        printf("to aqui\n");
         tabuleiro->posicoes[jogador->pos_x][jogador->pos_y] = COM_TESOURO_VISITADA;
         
         return 1;
@@ -226,4 +249,40 @@ unsigned int encontrou_tesouro(struct tabuleiro_t *tabuleiro, struct jogador_t *
 
     //Não tinha tesouro na posição
     return 0;
+}
+
+unsigned int procurando_tesouros(struct jogador_t *jogador)
+{
+    unsigned int resultado = 0;
+    for (int i = 0; i < 8; i++)
+        resultado += jogador->tesouros[i];
+
+    if (resultado == 8)
+        return 0;       //encontrou os 8 tesouros
+    
+    return 1;           //ainda procurando
+}
+
+void mensagem_vitoria(struct jogador_t *jogador)
+{
+    printf("            ⚜️ 🏆 𝕍𝕠𝕔ê 𝕍𝕖𝕟𝕔𝕖𝕦!!! 🏆⚜️\n");
+    printf("      ┌──────────────────────────────────┐ \n");
+    printf("      │ Número de Movimentos: %d         │ \n", jogador->casas_percorridas);
+    printf("      └──────────────────────────────────┘ \n");
+}
+
+void limpa_terminal() {
+    printf("\033[2J\033[H");
+    fflush(stdout);
+}
+
+void infos_jogo(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador)
+{
+    printf("Informações Do Jogo - Caça ao Tesouro\n");
+    printf("┌─────────────────────────────────────────┐ \n");
+    printf("│Número de Casas Percorridas: %d          │ \n", jogador->casas_percorridas);
+    printf("│Posições dos Tesouros:                   │ \n");
+    for (int i = 0; i < 8; i++)
+        printf("│ID: %d -> (%d, %d)                          │\n", i, tabuleiro->posicao_tesouro[i].x, tabuleiro->posicao_tesouro[i].y);
+    printf("└─────────────────────────────────────────┘ \n");
 }

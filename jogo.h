@@ -30,6 +30,7 @@ struct jogador_t{
     unsigned int pos_x;                 //coordenada x da posição atual
     unsigned int pos_y;                 //coordenada y da posição atual
     unsigned int tesouros[8];           //bitmap dos tesouros que o jogador encontrou
+    unsigned int casas_percorridas;     //quantidade de casas que o jogador já passou
 };
 
 typedef struct termios termios;
@@ -70,6 +71,21 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *
 //Trata o caso do jogador encontrar um tesouro
 //Retorno: 1 caso encontrou o tesouro e 0 caso contrário
 unsigned int encontrou_tesouro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador);
+
+//Pode ser usado para o controle do laço das movimentações
+//Retorna 1 enquanto não tiver encontrado todos os tesouros e 0 quando tiver encontrado todos
+unsigned int procurando_tesouros(struct jogador_t *jogador);
+
+//Para encerrar o jogo
+//Mostrar na tela do cliente uma mensagem de vitória
+void mensagem_vitoria(struct jogador_t *jogador);
+
+//Limpa a tela (usar se precisar)
+void limpa_terminal();
+
+//Imprime as informações gerenciais do jogo
+//É chamada no servidor
+void infos_jogo(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador);
 
 
 #endif
