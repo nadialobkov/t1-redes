@@ -173,6 +173,11 @@ void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
     return;
 }
 
+// recebe sockets, pacotes (previamente alocados) e nome do arquivo a ser enviado
+// eh enviado o tamanho do arquivo e em seguida o arquivo
+// o arquivo eh quebrado em partes (sequencializadas) para entrar no campo de dados
+// ao final eh enviado uma mensagem de fim de arquivo
+// todas as mensagens esperam um ACK de resposta
 void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome) {
 
     // adiciona caminho do arquivo que esta no servidor
