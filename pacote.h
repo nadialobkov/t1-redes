@@ -89,7 +89,8 @@ void envia_pacote(int sock, pacote_t *pack);
 
 // recebe um pacote atraves do socket e escreve ele em 'pack'
 // esta funcao espera ate receber uma mensagem valida (verificando o marcador de inicio)
-void recebe_pacote(int sock, pacote_t *pack);
+// retorna o tipo da mensagem recebida
+uint8_t recebe_pacote(int sock, pacote_t *pack);
 
 
 #endif

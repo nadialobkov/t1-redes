@@ -143,7 +143,7 @@ void envia_pacote(int sock, pacote_t *pack) {
 
 // espera pacotes e verifica marcador de inicio
 // escreve em 'pack' o pacote recebido
-void recebe_pacote(int sock, pacote_t *pack) {
+uint8_t recebe_pacote(int sock, pacote_t *pack) {
 
     int bytes_lidos = 0;
     uint8_t marc = 0;
@@ -157,6 +157,70 @@ void recebe_pacote(int sock, pacote_t *pack) {
 
         marc = pack->marcador;
     }
+
+    return (pack->tam);
+}
+
+// espera ate receber um pacote do tipo ACK
+// se recebeu outro tipo, reenvia a mesma mensagem
+// pack_send => pacote que contem a mensagem a ser enviada
+// pack_recv => pacote por onde vai recever a mensagem
+void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
+
+    while (recebe_pacote(sock, pack_recv) != ACK) {
+        envia_pacote(sock, pack_send); // reenvia
+    }
+    return;
+}
+
+void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome) {
+
+    // adiciona caminho do arquivo que esta no servidor
+    char path[150] = "./arq_servidor/";
+    strncat(path, nome, 150); // concatena
+
+    // usa estrutura stat para conseguir info do arquivo
+    struct stat info;
+    if(stat(path, &info) == -1) {
+        perror("Erro ao obter informações do arquivo");
+        return (NULL);
+    }
+    // obtem tamanho do arquivo
+    size_t tamanho = info.st_size;
+    // envia tamanho do arquivo
+    escreve_pacote(pack_send, TAM, sizeof(tamanho), 0, &tamanho);
+    envia_pacote(sock, pack_send);
+    espera_ack(sock, pack_send, pack_recv);
+
+
+    // abre arquivo
+    FILE *arq = fopen(path, "r");
+    if (!arq) {
+        perror("Erro ao abrir arquivo");
+        return;
+    }
+
+    fseek(arq, 0, SEEK_SET); // aponta para inicio do arquivo
+
+    // vai percorrer o arquivo lendo 'TAM_MAX' bytes para enviar nos pacotes
+    char dados[TAM_MAX];
+    uint8_t bytes_lidos;
+    uint8_t seq = 0; // numero de sequencia
+
+    // le dados do arquivo
+    while (fgets(dados, TAM_MAX, arq)) {
+        seq %= 32; // numero de sequencia (0-31)
+        bytes_lidos = strnlen(dados, TAM_MAX);
+        escreve_pacote(pack_send, DADOS, bytes_lidos, seq, dados);
+        envia_pacote(sock, pack_send);
+        // espera confimacao do recebimento do pacote
+        espera_ack(sock, pack_send, pack_recv);
+        seq++;
+    }
+
+    // chegou ao fim do arquivo, enviou tudo
+    escreve_pacote(pack_send, FIM, 0, 0, NULL);
+    espera_ack(sock, pack_send, pack_recv);
 
     return;
 }
