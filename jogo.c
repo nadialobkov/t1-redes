@@ -24,16 +24,6 @@ struct tabuleiro_t* cria_tabuleiro()
             tabuleiro->posicoes[i][j] = NAO_VISITADA;
     }
 
-    //Atribuindo os arquivos
-    tabuleiro->tesouros[0] = "tesouros/0.jpg";
-    tabuleiro->tesouros[1] = "tesouros/1.txt";
-    tabuleiro->tesouros[2] = "tesouros/2.txt";
-    tabuleiro->tesouros[3] = "tesouros/3.txt";
-    tabuleiro->tesouros[4] = "tesouros/4.txt";
-    tabuleiro->tesouros[5] = "tesouros/5.mp4";
-    tabuleiro->tesouros[6] = "tesouros/6.txt";
-    tabuleiro->tesouros[7] = "tesouros/7.jpg";
-
     //Gera posições aleatórias para os tesouros
     srand(0);                                   //inicializa semente aleatória /OBS trocar para srand(time=NULL) depois de pronto
     unsigned int x, y;                          //posições dos tesouros
