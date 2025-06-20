@@ -13,41 +13,60 @@ int main ()
     tesouro = encontrou_tesouro(tabuleiro, jogador);
     imprime_tabuleiro(tabuleiro, jogador);
 
-    printf("------------------------------------------------------------------------------\n");
+    // printf("------------------------------------------------------------------------------\n");
 
-    //Cima
-    movimentacao = movimenta_jogador(tabuleiro, jogador, 11);
-    tesouro = encontrou_tesouro(tabuleiro, jogador);
-    imprime_tabuleiro(tabuleiro, jogador);
+    // //Cima
+    // movimentacao = movimenta_jogador(tabuleiro, jogador, 11);
+    // tesouro = encontrou_tesouro(tabuleiro, jogador);
+    // imprime_tabuleiro(tabuleiro, jogador);
 
-    printf("------------------------------------------------------------------------------\n");
-    printf("vou movimentar a jogadora\n");
-    //Direita
-    movimentacao = movimenta_jogador(tabuleiro, jogador, 10);
-    tesouro = encontrou_tesouro(tabuleiro, jogador);
-    imprime_tabuleiro(tabuleiro, jogador);
+    // printf("------------------------------------------------------------------------------\n");
+    // printf("vou movimentar a jogadora\n");
+    // //Direita
+    // movimentacao = movimenta_jogador(tabuleiro, jogador, 10);
+    // tesouro = encontrou_tesouro(tabuleiro, jogador);
+    // imprime_tabuleiro(tabuleiro, jogador);
 
-    printf("------------------------------------------------------------------------------\n");
-    //Baixo
-    movimentacao = movimenta_jogador(tabuleiro, jogador, 12);
-    tesouro = encontrou_tesouro(tabuleiro, jogador);
-    imprime_tabuleiro(tabuleiro, jogador);
+    // printf("------------------------------------------------------------------------------\n");
+    // //Baixo
+    // movimentacao = movimenta_jogador(tabuleiro, jogador, 12);
+    // tesouro = encontrou_tesouro(tabuleiro, jogador);
+    // imprime_tabuleiro(tabuleiro, jogador);
 
-    printf("------------------------------------------------------------------------------\n");
+    // printf("------------------------------------------------------------------------------\n");
 
-    //Esquerda
-    movimentacao = movimenta_jogador(tabuleiro, jogador, 13);
-    tesouro = encontrou_tesouro(tabuleiro, jogador);
-    imprime_tabuleiro(tabuleiro, jogador);
+    // //Esquerda
+    // movimentacao = movimenta_jogador(tabuleiro, jogador, 13);
+    // tesouro = encontrou_tesouro(tabuleiro, jogador);
+    // imprime_tabuleiro(tabuleiro, jogador);
 
-    printf("------------------------------------------------------------------------------\n");
+    // printf("------------------------------------------------------------------------------\n");
 
-    //Movimentação inválida
-    movimentacao = movimenta_jogador(tabuleiro, jogador, 13);
-    tesouro = encontrou_tesouro(tabuleiro, jogador);
-    imprime_tabuleiro(tabuleiro, jogador);
-     if (!movimentacao)
-         printf("Bateu na parede! 🤕\n");
+    // //Movimentação inválida
+    // movimentacao = movimenta_jogador(tabuleiro, jogador, 13);
+    // tesouro = encontrou_tesouro(tabuleiro, jogador);
+    // imprime_tabuleiro(tabuleiro, jogador);
+    //  if (!movimentacao)
+    //      printf("Bateu na parede! 🤕\n");
+
+    int movimento = 0;
+    while (1)
+    {
+        tesouro = encontrou_tesouro(tabuleiro, jogador);
+        movimento = le_movimento();
+        if (movimento)
+            movimentacao = movimenta_jogador(tabuleiro, jogador, movimento);
+        else
+            printf("Tecla inválida! Pressione uma das setas!\n");
+        if (movimentacao)
+        {
+            //Limpa o terminal e imprime novamente
+            tesouro = encontrou_tesouro(tabuleiro, jogador);
+            imprime_tabuleiro(tabuleiro, jogador);
+        }
+        else
+            printf("Bateu na parede! 🤕\n");
+    }
 
      destroi_tabuleiro(tabuleiro, jogador);
 }

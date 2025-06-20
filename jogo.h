@@ -7,6 +7,12 @@
 #define COM_TESOURO_NAO_VISITADA 2
 #define COM_TESOURO_VISITADA 3
 
+//Direções
+#define DIREITA 10
+#define CIMA 11
+#define BAIXO 12
+#define ESQUERDA 13
+
 //Estrutura Coordenadas
 struct coordenadas_t {
     unsigned int x;
@@ -26,6 +32,8 @@ struct jogador_t{
     unsigned int tesouros[8];           //bitmap dos tesouros que o jogador encontrou
 };
 
+typedef struct termios termios;
+
 //Funções
 
 //Cria e inicializa o tabuleiro 8x8
@@ -42,6 +50,16 @@ struct jogador_t* cria_jogador();
 //Imprime na tela o grid do tabuleiro e o jogador na posição 0x0
 //(canto inferior esquerdo)
 void imprime_tabuleiro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador);
+
+//Desativa o modo canonico para não precisar digitar o enter depois de pressionar uma tecla
+void desativa_modo_canonico(struct termios *old);
+
+//Reativa o modo canonico
+void restaura_canonico(struct termios *old);
+
+//Captura a seta pressionada pelo usuário
+//Retorno: um inteiro que representa a posição recebida
+unsigned int le_movimento();
 
 //Verifica a possibilidade de mudar de posição
 //Caso seja possível, mudar de posição
