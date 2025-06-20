@@ -12,27 +12,23 @@
 // retorna file descriptor do socket
 int cria_raw_socket(char* nome_interface_rede);
 
-//Detecta o tipo dos dados (extensão)
-//Recebe um arquivo e retorna sua extensão
-char* devolve_extensao(char *caminho_arquivo);
+
+// detectna o tipo dos dados (extensão)
+// retorna tipo (IMG, VIDEO, TXT) ou ERRO em caso de erro
+uint8_t devolve_extensao(char *caminho_arquivo);
 
 //Mostra o arquivo na tela
 void exibe_arquivo(const char *caminho_arquivo);
 
-// Prepara um vetor de pacotes de dados que formam um arquivo para serem enviados sequencialmente
-// Retorno: vetor de pacotes
-struct pacote **prepara_pacotes_dados(const char *caminho);
 
-// Cria um arquivo no caminho indicado com os dados presentes no vetor de pacotes
-// Retorno: 0 em caso de sucesso e valores negativos em caso de erro
-uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const char *caminho);
+// recebe sockets, pacotes (previamente alocados) e nome do arquivo a ser enviado
+// eh enviado o nome do arquivo, tamanho e em seguida os dados do arquivo
+// o arquivo eh quebrado em partes (sequencializadas) para entrar no campo de dados
+// ao final eh enviado uma mensagem de fim de arquivo
+// todas as mensagens esperam um ACK de resposta
+void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome);
 
-//Atribui o ack + formato do arquivo e coloca o nome dele no campo de dados
-//Retorno: um pacote que é a mensagem de ACK
-struct pacote* ack_format_arq(struct pacote *pack);
 
-//Trata os casos de ACK, NACK e ERRO
-//Retorno: os bytes enviados ou 0 em caso de ACK
 
 
 

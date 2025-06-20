@@ -49,10 +49,12 @@ int cria_raw_socket(char* nome_interface_rede) {
     return soquete;
 }
 
-// ------------------------------------------------------------------------------------------------
 
-//Detecta a extensão dos dados --------------------------------------------------------------------
-char* devolve_extensao(char *caminho_arquivo)
+//-------------------------------------------------------------------------------------------------
+
+// retorna tipo (IMG, VIDEO, TXT) da extensao do arquivo indicado
+// ou ERRO em caso de erro
+uint8_t devolve_extensao(char *caminho_arquivo)
 {
     //Abre o arquivo em modo binário
     FILE *arquivo = fopen(caminho_arquivo, "rb");
@@ -61,8 +63,8 @@ char* devolve_extensao(char *caminho_arquivo)
     if (!arquivo)
     {
         //Assume que algo foi lido pelo terminal
-        printf("Não foi possível abrir o arquivo!\n");
-        return NULL;
+        perror("Não foi possível abrir o arquivo!");
+        return ERRO;
     }
 
     //Buffer para armazenar o cabeçalho que será lido
@@ -77,31 +79,28 @@ char* devolve_extensao(char *caminho_arquivo)
     if (lidos < 8)
     {
         printf("Erro ou Arquivo muito pequeno\n");
-        return NULL;
+        return ERRO;
     }
     else
     {
         if (cabecalho[0] == 0xFF && cabecalho[1] == 0xD8)
-            return(".jpg");
+            return (IMG);
         else if (cabecalho[4] == 0x66 && cabecalho[5] == 0x74 && cabecalho[6] == 0x79 && cabecalho[7] == 0x70)
-            return(".mp4");
+            return(VIDEO);
         else
-            return(".txt");
+            return(TEXT);
     }
 }
-//-------------------------------------------------------------------------------------------------
 
 //Exibe o arquivo (Tesouro) na tela com um processo filho
 //OBS: Usar o comando which nome_do_aplicativo para saber se está instalado no computador
 void exibe_arquivo(const char *caminho_arquivo)
 {
     //Descobre o formato do arquivo
-    const char *extensao = devolve_extensao(caminho_arquivo);
+    uint8_t extensao = devolve_extensao(caminho_arquivo);
 
-    printf("Extensão = %s\n", extensao);
-    if (!extensao)
-    {
-        printf("Erro ao obter a extensão do arquivo\n");
+    if (extensao == ERRO) {
+        perror("Erro ao obter a extensão do arquivo");
         return;
     }
 
@@ -110,9 +109,9 @@ void exibe_arquivo(const char *caminho_arquivo)
 
     //Com base na extensão, preenche os campos dos argumentos
     char *args[3];
-    if (strcmp(extensao, ".jpg") == 0)
+    if (extensao == IMG)
         args[0] = "/usr/bin/feh";       //local do aplicativo
-    else if (strcmp(extensao, ".mp4") == 0)
+    else if (extensao == VIDEO)
         args[0] = "/usr/bin/ffplay";    //local do aplicativo
     else
         args[0] = "/usr/bin/gedit";     //local do aplicativo
@@ -121,8 +120,7 @@ void exibe_arquivo(const char *caminho_arquivo)
     args[2] = NULL;
 
     //Executa o processo filho
-    if (pid == 0)
-    {
+    if (pid == 0) {
         execv(args[0], args);
         perror("execv() falhou!\n");
     }
@@ -135,107 +133,73 @@ void exibe_arquivo(const char *caminho_arquivo)
     else
         perror("fork() falhou :(\n");
 }
+
 //----------------------------------------------------------------------------------------------------------------------
 
-// prepara vetor de pacotes com os dados a serem enviados
-// recebe caminho do arquivo
+// recebe sockets, pacotes (previamente alocados) e nome do arquivo a ser enviado
+// eh enviado o nome do arquivo, tamanho e em seguida os dados do arquivo
+// o arquivo eh quebrado em partes (sequencializadas) para entrar no campo de dados
+// ao final eh enviado uma mensagem de fim de arquivo
+// todas as mensagens esperam um ACK de resposta
+void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome) {
 
-// struct pacote **prepara_pacotes_dados(const char *caminho) {
+    // adiciona caminho do arquivo que esta no servidor
+    char path[150] = "./arq_servidor/";
+    strncat(path, nome, 150); // concatena
 
-//     // usa estrutura stat para conseguir info do arquivo
-//     struct stat info;
+    // envia nome do arquivo 
+    uint8_t tam = strnlen(nome, TAM_MAX);
+    uint8_t tipo = devolve_extensao(path);
+    escreve_pacote(pack_send, tipo, tam, 0, nome);
+    envia_pacote(sock, pack_send);
+    espera_ack(sock, pack_send, pack_recv);
 
-//     if(stat(caminho, &info) == -1) {
-//         perror("Erro ao obter informações do arquivo");
-//         return (NULL);
-//     }
-//     // obtem tamanho do arquivo
-//     size_t tamanho = info.st_size;
-
-//     // abre o arquivo
-//     FILE *arquivo = fopen(caminho, "r");
-//     if (!arquivo) {
-//         perror("Erro ao abrir arquivo");
-//         return (NULL);
-//     }
-//     fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
-
-//     // descobre quantos pacotes serao necessarios para enviar todo o arquivo
-//     size_t num = (tamanho / TAM_MAX) + 1; // teto
-
-//     // cria vetor de pacotes
-//     struct pacote **packets = malloc(num * sizeof(struct pacote *));
-//     if (!packets) {
-//         perror("Erro ao criar vetor de pacotes");
-//         return (-2);
-//     }
-
-//     printf("tamanho arquivo: %d\n", tamanho);
-//     printf("num: %d\n", num);
+    // usa estrutura stat para conseguir info do arquivo
+    struct stat info;
+    if(stat(path, &info) == -1) {
+        perror("Erro ao obter informações do arquivo");
+        return (NULL);
+    }
+    // obtem tamanho do arquivo
+    size_t tamanho = info.st_size;
+    // envia tamanho do arquivo
+    escreve_pacote(pack_send, TAM, sizeof(tamanho), 0, &tamanho);
+    envia_pacote(sock, pack_send);
+    espera_ack(sock, pack_send, pack_recv);
 
 
-//     // cria pacotes com os pedaços de dados do arquivo
-//     // inicializa campos da estrutura
-//     for (size_t i = 0; i < num; i++) {
+    // abre arquivo
+    FILE *arq = fopen(path, "r");
+    if (!arq) {
+        perror("Erro ao abrir arquivo");
+        return;
+    }
 
-//         printf("i: %d\n", i);
+    fseek(arq, 0, SEEK_SET); // aponta para inicio do arquivo
 
-//         packets[i] = malloc(sizeof(struct pacote));
-//         if (!packets[i]) {
-//             perror("Erro ao criar pacote de transmissao de dados");
-//             return (-3);
-//         }
+    // vai percorrer o arquivo lendo 'TAM_MAX' bytes para enviar nos pacotes
+    char dados[TAM_MAX];
+    uint8_t bytes_lidos;
+    uint8_t seq = 0; // numero de sequencia
 
-//         packets[i]->marcador = MARC;
-//         packets[i]->seq = i % 32;
-//         packets[i]->tipo = DADOS;
+    // le dados do arquivo
+    while (fgets(dados, TAM_MAX, arq)) {
+        seq %= 32; // numero de sequencia (0-31)
+        bytes_lidos = strnlen(dados, TAM_MAX);
+        escreve_pacote(pack_send, DADOS, bytes_lidos, seq, dados);
+        envia_pacote(sock, pack_send);
+        // espera confimacao do recebimento do pacote
+        espera_ack(sock, pack_send, pack_recv);
+        seq++;
+    }
 
-//         size_t bytes_lidos = fread(packets[i]->dados, 1, TAM_MAX, arquivo);
-//         printf("leu tantos bytes: %d\n", bytes_lidos);
-//         printf("leu: %s\n", packets[i]->dados);
+    // chegou ao fim do arquivo, enviou tudo
+    escreve_pacote(pack_send, FIM, 0, 0, NULL);
+    espera_ack(sock, pack_send, pack_recv);
 
-//         packets[i]->tam = bytes_lidos; 
+    return;
+}
 
-//         calcula_checksum(packets[i]);
-//     }
-
-//     printf("saiu laco\n");
-
-//     fclose(arquivo);
-
-//     return (packets); 
-// }
-// //------------------------------------------------------------------------------------------------------------------
-
-// // recebe um vetor de pacotes contendo dados separados sequencialmente
-// // escreve o arquivo no caminho passado 
-// // retorna 0 em caso de sucesso e valores negativos em caso de erro
-
-// uint8_t interpreta_pacotes_dados(struct pacote **packets, uint8_t tam, const char *caminho) {
-
-//     // cria o arquivo para copiar os dados do pacote
-//     FILE *arquivo = fopen(caminho, "w");
-//     if (!arquivo) {
-//         perror("Erro ao criar arquivo");
-//         return (NULL);
-//     }
-//     fseek(arquivo, 0, SEEK_SET);    // apontamos para inicio do arquivo
-
-//     if (!packets) {
-//         perror("Erro: vetor de pacotes inválido");
-//         return (-1);
-//     }
-
-//     // vamos percorres os pacotes escrever os dados no arquivo
-//     for (uint8_t i = 0; i < tam; i++) {
-//         fputs(packets[i]->dados, arquivo);
-//     }
-
-//     fclose(arquivo);
-
-//     return (0);
-// }
-// //----------------------------------------------------------------------------------------------
 
 // //Atribui o tipo de ack ao pacote e devolve um pacote com a informação
 // struct pacote* ack_format_arq(struct pacote *pack)
