@@ -16,7 +16,6 @@ struct coordenadas_t {
 //Estrutura Tabuleiro - Estático, porque as posições não irão passar de 64 e são 8 tesouros
 struct tabuleiro_t {
     unsigned int posicoes[8][8];               //matriz de posições (são 64 posições disponíveis)
-    char *tesouros[8];                         //todos os tesouros do tabuleiro
     struct coordenadas_t posicao_tesouro[8];   //coordenadas x e y dos tesouros
 };
 
