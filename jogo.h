@@ -44,5 +44,11 @@ struct jogador_t* cria_jogador();
 //(canto inferior esquerdo)
 void imprime_tabuleiro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador);
 
+//Verifica a possibilidade de mudar de posição
+//Caso seja possível, mudar de posição
+//Caso não seja, ficar no lugar e devolver 0
+//(A ideia é colocar o campo dos dados na direção)
+unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador, unsigned int direcao);
+
 
 #endif

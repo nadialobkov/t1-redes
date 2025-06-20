@@ -97,7 +97,7 @@ void imprime_tabuleiro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador)
                 printf("│ 🎖️  │ ");
             else if (tabuleiro->posicoes[k][i] == SEM_TESOURO_VISITADA)
                 printf("│ ❌  │ ");   //mudar
-            else if ((k == jogador->pos_x) && (i == jogador->pos_y))
+            else if ((k == jogador->pos_y) && (i == jogador->pos_x))
                 printf("│ 💃 │ ");
                 else
                 printf("│ ⚜️  │ ");
@@ -109,4 +109,44 @@ void imprime_tabuleiro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador)
             printf("└────┘ ");
         printf("\n");
     }
+}
+
+unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador, unsigned int direcao)
+{
+    switch (direcao)
+    {
+        //Direita
+        case 10:
+            if (jogador->pos_x == 7)
+                return 0;                   //Não é possível movimentar
+            
+            jogador->pos_x++;
+            break;
+
+        //Cima
+        case 11:
+            if (jogador->pos_y == 7)
+                return 0;                   //Não é possível movimentar
+            
+            jogador->pos_y++;
+            break;
+
+        //Baixo
+        case 12:
+            if (jogador->pos_y == 0)
+                return 0;                   //Não é possível movimentar
+            
+            jogador->pos_y--;
+            break;
+
+        //Esquerda
+        case 13:
+            if (jogador->pos_x == 0)
+                return 0;                   //Não é possível movimentar
+            
+            jogador->pos_x--;
+            break;
+    }
+
+    return 1;                               //Foi possível movimentar
 }
