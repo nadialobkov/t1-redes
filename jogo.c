@@ -55,6 +55,9 @@ struct tabuleiro_t* cria_tabuleiro()
         tabuleiro->posicoes[x][y] = COM_TESOURO_NAO_VISITADA;
         tabuleiro->posicao_tesouro[i].x = x;
         tabuleiro->posicao_tesouro[i].y = y;
+
+        //Isso ajuda a debugar
+        //printf("tesouro[%d].x = %d\ntesouro[%d].y = %d\n", i, x, i, y);
     }
 
     return tabuleiro;
@@ -93,13 +96,13 @@ void imprime_tabuleiro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador)
         //Meio dos quadradinhos
         for (int i = 0; i < 8; i++)
         {
-            if (tabuleiro->posicoes[k][i] == COM_TESOURO_VISITADA)
-                printf("│ 🎖️  │ ");
-            else if (tabuleiro->posicoes[k][i] == SEM_TESOURO_VISITADA)
-                printf("│ ❌  │ ");   //mudar
-            else if ((k == jogador->pos_y) && (i == jogador->pos_x))
+            if ((k == jogador->pos_y) && (i == jogador->pos_x))
                 printf("│ 💃 │ ");
-                else
+            else if (tabuleiro->posicoes[i][k] == COM_TESOURO_VISITADA)
+                printf("│ 🎖️  │ ");
+            else if (tabuleiro->posicoes[i][k] == SEM_TESOURO_VISITADA)
+                printf("│ ❌ │ ");   //mudar
+            else
                 printf("│ ⚜️  │ ");
         }
         printf("\n");
@@ -113,6 +116,8 @@ void imprime_tabuleiro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador)
 
 unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador, unsigned int direcao)
 {
+    printf("jogador->pox_x = %d\n", jogador->pos_x);
+
     switch (direcao)
     {
         //Direita
@@ -149,4 +154,32 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, struct jogador_t *
     }
 
     return 1;                               //Foi possível movimentar
+}
+
+unsigned int encontrou_tesouro(struct tabuleiro_t *tabuleiro, struct jogador_t *jogador)
+{
+    unsigned int i = 0;
+
+    //Se houver tesouro não visitado
+    if (tabuleiro->posicoes[jogador->pos_x][jogador->pos_y] == COM_TESOURO_NAO_VISITADA)
+    {
+        //Identifica qual foi o tesouro encontrado
+        //Vai sair do laço quando encontrar o id do tesouro que temos as coordenadas
+        while ((tabuleiro->posicao_tesouro[i].x != jogador->pos_x) || (tabuleiro->posicao_tesouro[i].y != jogador->pos_y))
+            i++;
+        
+        //Atualiza o bitmap de tesouros do jogador
+        jogador->tesouros[i] = 1;
+
+        //Atualiza o tabuleiro
+        printf("to aqui\n");
+        tabuleiro->posicoes[jogador->pos_x][jogador->pos_y] = COM_TESOURO_VISITADA;
+        
+        return 1;
+    }
+
+    tabuleiro->posicoes[jogador->pos_x][jogador->pos_y] = SEM_TESOURO_VISITADA;
+
+    //Não tinha tesouro na posição
+    return 0;
 }
