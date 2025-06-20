@@ -43,6 +43,14 @@ struct tabuleiro_t* cria_tabuleiro()
         x = rand() % 8;
         y = rand() % 8;
 
+        //TOMAR CUIDADO COM ESSE WHILE
+        while (tabuleiro->posicoes[x][y] == COM_TESOURO_NAO_VISITADA)
+        {
+            //Já tem tesouro nessa posição - precisa sortear novamente
+            x = rand() % 8;
+            y = rand() % 8;
+        }
+
         //Identifica qual tesouro (i) está na posição marcada
         tabuleiro->posicoes[x][y] = COM_TESOURO_NAO_VISITADA;
         tabuleiro->posicao_tesouro[i].x = x;
