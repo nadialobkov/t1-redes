@@ -5,10 +5,10 @@ CFLAGS = -Wall -Wextra -g
 SERVER_EXEC = servidor
 CLIENT_EXEC = cliente
 
-SERVER_SRC = servidor.c sock.o pacote.o
-CLIENT_SRC = cliente.c sock.o pacote.o
+SERVER_SRC = servidor.c pacote.o sock.o 
+CLIENT_SRC = cliente.c pacote.o sock.o
 
-.PHONY: all clean clean_cliente
+.PHONY: all debug clean clean_cliente
 
 # regra para compilar tudo
 all: $(SERVER_EXEC) $(CLIENT_EXEC)
@@ -23,6 +23,9 @@ $(CLIENT_EXEC): $(CLIENT_SRC)
 
 %.o: %.c sock.h
 	$(CC) $(CFLAGS) -c $< -o $@
+
+debug: CFLAGS += -DDEBUG
+debug: $(SERVER_EXEC) $(CLIENT_EXEC)
 
 # limpar arquivos objeto e executáveis
 clean:

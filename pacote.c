@@ -43,6 +43,42 @@ void destroi_pacote(pacote_t *pack) {
     return;
 }
 
+// imprime informacoes do pacote (tipo, tamanho, dados)
+void imprime_pacote(pacote_t *pack) {
+    
+    if (!pack) {
+        printf("Pacote inválido\n");
+        return;
+    }
+    printf("Pacote: ");
+    switch (pack->tipo) {
+        case ACK: printf("ACK\n"); break;
+        case NACK: printf("NACK\n"); break;
+        case OK: printf("OK\n"); break;
+        case SYN: printf("SYN\n"); break;
+        case TAM: printf("TAM\n"); break;
+        case DADOS: printf("DADOS\n"); break;
+        case TEXT: printf("TEXT\n"); break;
+        case VIDEO: printf("VIDEO\n"); break;
+        case IMG: printf("IMG\n"); break;
+        case FIM: printf("FIM\n"); break;
+        case DIR: printf("DIR\n"); break;
+        case CIMA: printf("CIMA\n"); break;
+        case BAIXO: printf("BAIXO\n"); break;
+        case ESQ: printf("ESQ\n"); break;
+        case ERRO: printf("ERRO\n"); break;
+        default: break;
+    }
+
+    printf("\tTamanho: %d bytes\n", pack->tam);
+    // copia dados para buffer para imprimir
+    uint8_t buffer[TAM_MAX+1];
+    strncpy(buffer, pack->dados, pack->tam);
+    buffer[TAM_MAX] = '\0';
+    printf("\tDados: %s\n", buffer);
+
+    return;
+}
 
 // Calcula checksum --------------------------------------------------------------------------------
 // Campos: tamanho + sequência + tipo + dados
@@ -139,6 +175,11 @@ void envia_pacote(int sock, pacote_t *pack) {
         perror("Erro ao enviar mensagem");
     }
 
+    #ifdef DEBUG
+    printf("Enviado: ");
+    imprime_pacote(pack);
+    #endif
+
     return;
 }
 
@@ -159,6 +200,11 @@ uint8_t recebe_pacote(int sock, pacote_t *pack) {
         marc = pack->marcador;
     }
 
+    #ifdef DEBUG
+    printf("Recebido: ");
+    imprime_pacote(pack);
+    #endif
+
     return (pack->tam);
 }
 
@@ -170,6 +216,62 @@ void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 
     while (recebe_pacote(sock, pack_recv) != ACK) {
         envia_pacote(sock, pack_send); // reenvia
+    }
+    return;
+}
+
+
+// espera o recebimento do pacote de um determinado tipo
+// ao receber, verifica o checksum
+// se houve erro ele envia nack e continua esperando o correto
+// em caso de sucesso, envia ack e para de esperar
+void espera_pacote(uint8_t tipo, int sock, pacote_t *pack_send, pacote_t *pack_recv) {
+
+    while (1) {
+        // verifica se pacote recebido eh do tipo esperado
+        if (recebe_pacote(sock, pack_recv) == tipo) {
+            // faz a verificacao dos dados
+            if (!verifica_checksum(pack_recv)) {
+                // se houve erro no checksum, envia um nack
+                escreve_pacote(pack_send, NACK, 0, 0, NULL);
+                envia_pacote(sock, pack_send);
+            }
+            // se checksum esta correto, enviamos um ack
+            else {
+                escreve_pacote(pack_send, ACK, 0, 0, NULL);
+                envia_pacote(sock, pack_send);
+                // paramos de receber pacotes
+                break;
+            }
+        }
+    }
+    return;
+}
+
+// espera um pacote de algum tipo de arquivo (TEXTO, IMG ou VIDEO)
+void espera_pacote_arquivo(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
+
+    while (1) {
+        printf("while do espera arq\n");
+        // verifica se pacote recebido eh algum tipo de arquivo
+        uint8_t tipo = recebe_pacote(sock, pack_recv);
+        if (tipo == IMG || tipo == VIDEO || tipo == TEXT) {
+            // faz a verificacao dos dados
+            if (!verifica_checksum(pack_recv)) {
+                printf("erro no checksum\n");
+                // se houve erro no checksum, envia um nack
+                escreve_pacote(pack_send, NACK, 0, 0, NULL);
+                envia_pacote(sock, pack_send);
+            }
+            // se checksum esta correto, enviamos um ack
+            else {
+                printf("checksum correto\n");
+                escreve_pacote(pack_send, ACK, 0, 0, NULL);
+                envia_pacote(sock, pack_send);
+                // paramos de receber pacotes
+                break;
+            }
+        }
     }
     return;
 }

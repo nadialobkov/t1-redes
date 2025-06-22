@@ -68,6 +68,8 @@ pacote_t *cria_pacote();
 // libera espaco alocado pelo pacote
 void destroi_pacote(pacote_t *pack);
 
+// imprime informacoes do pacote (tipo, tamanho, dados)
+void imprime_pacote(pacote_t *pack);
 
 // calcula a soma dos bits dos campos tamanho, sequência, tipo e dados
 //Guarda o valor no pacote
@@ -101,6 +103,15 @@ uint8_t recebe_pacote(int sock, pacote_t *pack);
 // espera ate receber um pacote do tipo ACK
 // se recebeu outro tipo, reenvia a mesma mensagem
 void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv);
+
+// espera o recebimento do pacote de um determinado tipo
+// ao receber, verifica o checksum
+// se houve erro ele envia nack e continua esperando o correto
+// em caso de sucesso, para de esperar
+void espera_pacote(uint8_t tipo, int sock, pacote_t *pack_send, pacote_t *pack_recv);
+
+// espera um pacote de algum tipo de arquivo (TEXTO, IMG ou VIDEO)
+void espera_pacote_arquivo(int sock, pacote_t *pack_send, pacote_t *pack_recv);
 
 
 

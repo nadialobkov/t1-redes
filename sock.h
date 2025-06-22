@@ -1,6 +1,7 @@
 #ifndef _SOCK_H__
 #define _SOCK_H_
 
+#include "pacote.h"
 
 // BIBLIOTECA PARA TRATAR COM RAW SOCKETS
 
@@ -21,13 +22,18 @@ uint8_t devolve_extensao(char *caminho_arquivo);
 void exibe_arquivo(const char *caminho_arquivo);
 
 
-// recebe sockets, pacotes (previamente alocados) e nome do arquivo a ser enviado
+// funcao recebe sockets, pacotes (previamente alocados) e nome do arquivo a ser enviado
 // eh enviado o nome do arquivo, tamanho e em seguida os dados do arquivo
 // o arquivo eh quebrado em partes (sequencializadas) para entrar no campo de dados
 // ao final eh enviado uma mensagem de fim de arquivo
 // todas as mensagens esperam um ACK de resposta
 void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome);
 
+// funcao recebe socket e pacotes (previamente alocados)
+// espera receber pacotes contendo o nome, tamanho e dados do arquivo (com finalizador)
+// cria esse arquivo recebido em partes na memoria e exibe ele
+// envia ACKS e NACKS, seguindo o protocolo
+void recebe_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv);
 
 
 

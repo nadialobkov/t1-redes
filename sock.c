@@ -12,7 +12,10 @@
 
 #include "sock.h"
 #include "pacote.h"
- 
+
+// tamanho da string de extensao de arquivo
+// (.txt, .jpg, .mp4) + \0
+#define TAM_EXT 5
 
 // funcao de criacao de raw socket passada no enunciado do trabalho
 
@@ -136,7 +139,7 @@ void exibe_arquivo(const char *caminho_arquivo)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// recebe sockets, pacotes (previamente alocados) e nome do arquivo a ser enviado
+// funcao recebe sockets, pacotes (previamente alocados) e nome do arquivo a ser enviado
 // eh enviado o nome do arquivo, tamanho e em seguida os dados do arquivo
 // o arquivo eh quebrado em partes (sequencializadas) para entrar no campo de dados
 // ao final eh enviado uma mensagem de fim de arquivo
@@ -197,9 +200,59 @@ void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome)
     escreve_pacote(pack_send, FIM, 0, 0, NULL);
     espera_ack(sock, pack_send, pack_recv);
 
+    fclose(arq);
+
     return;
 }
 
+// funcao recebe socket e pacotes (previamente alocados)
+// espera receber pacotes contendo o nome, tamanho e dados do arquivo (com finalizador)
+// cria esse arquivo recebido em partes na memoria e exibe ele
+// envia ACKS e NACKS, seguindo o protocolo
+void recebe_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
+
+    // espera receber pacote do tipo do arquivo
+    espera_pacote_arquivo(sock, pack_send, pack_recv);
+
+    // guarda nome do arquivo (que foi passado no campo dados)
+    char nome[TAM_MAX+TAM_EXT];
+    strncpy(nome, pack_recv->dados, pack_recv->tam);
+
+    // cria string para guardar nome do arquivo com extensao
+    char extensao[TAM_EXT];
+    if (pack_recv->tipo == IMG) { strcpy(extensao, ".jpg"); }
+    else if (pack_recv->tipo == VIDEO) { strcpy(extensao, ".mp4"); }
+    else { strcpy(extensao, ".txt"); }
+    // concatena nome e extensao
+    strncat(nome, extensao, TAM_MAX+TAM_EXT);
+    nome[TAM_MAX+TAM_EXT-1] = '\0'; // adiciona caracter nulo ao final
+
+    // cria arquivo em modo de escrita
+    FILE *arq = fopen(nome, "w");
+    if (!arq) {
+        perror("Erro ao abrir o arquivo para escrita");
+        return;
+    }
+
+    // recebe pacote do tamanho
+    espera_pacote(TAM, sock, pack_send, pack_recv);
+    // ... precisa enviar mensagem de erro se nao tiver espaco
+
+    // enquando nao recebeu mensagem de fim de arquivo
+    while (recebe_pacote(sock, pack_recv) != FIM) {
+
+        espera_pacote(DADOS, sock, pack_send, pack_recv);
+        // escreve no arquivo os dados recebidos
+        fputs(pack_recv->dados, arq);
+    }
+    espera_pacote(FIM, sock, pack_send, pack_recv); // para confirmar o fim
+
+    fclose(arq);
+
+    exibe_arquivo(nome);
+
+    return;
+}
 
 // //Atribui o tipo de ack ao pacote e devolve um pacote com a informação
 // struct pacote* ack_format_arq(struct pacote *pack)
