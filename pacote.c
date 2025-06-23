@@ -123,7 +123,6 @@ unsigned int verifica_checksum(pacote_t *pack)
     if (checksum_original != pack->checksum)
         return 0;
     
-    printf("Checksum OK!\n");
 
     return 1;
 }

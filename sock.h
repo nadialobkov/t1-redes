@@ -37,6 +37,4 @@ void recebe_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv);
 
 
 
-
-
 #endif
