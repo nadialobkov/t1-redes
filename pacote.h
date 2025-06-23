@@ -68,6 +68,8 @@ pacote_t *cria_pacote();
 // libera espaco alocado pelo pacote
 void destroi_pacote(pacote_t *pack);
 
+// imprime informacoes do pacote (tipo, tamanho, dados)
+void imprime_pacote(pacote_t *pack);
 
 // calcula a soma dos bits dos campos tamanho, sequência, tipo e dados
 //Guarda o valor no pacote
@@ -89,7 +91,28 @@ void envia_pacote(int sock, pacote_t *pack);
 
 // recebe um pacote atraves do socket e escreve ele em 'pack'
 // esta funcao espera ate receber uma mensagem valida (verificando o marcador de inicio)
-void recebe_pacote(int sock, pacote_t *pack);
+// retorna o tipo da mensagem recebida
+uint8_t recebe_pacote(int sock, pacote_t *pack);
+
+
+// NOTACAO ----------------------------------------------
+// pack_send => pacote que contem a mensagem a ser enviada
+// pack_recv => pacote por onde vai recever a mensagem
+
+
+// espera ate receber um pacote do tipo ACK
+// se recebeu outro tipo, reenvia a mesma mensagem
+void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv);
+
+// faz a verificacao do checksum do pacote de recebimento (pack_recv)
+// em caso de sucesso, envia um ACK e retorna 1
+// caso contrario, envia NACK e retorna 0
+uint8_t verifica_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv);
+
+// espera o recebimento do pacote valido
+// recebe pacotes e faz sua verificacao com 'verifica_pacote' (logo, realiza o envio de ACKS e NACKS)
+// retorna o tipo do pacote recebido quando for verificado com sucesso
+uint8_t espera_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv);
 
 
 #endif

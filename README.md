@@ -20,11 +20,15 @@ Implementação do Trabalho 1 da disciplina de Redes de Computadores 1 (2025/1)
 
     > make cliente
 
-4. Para limpar os arquivos gerados
+4. Para compilar tudo e exibir impressões de depuração
+
+    > make debug
+
+5. Para limpar os arquivos gerados
 
     > make clean
 
-5. Para limpar os arquivos salvos na pasta do cliente
+6. Para limpar os arquivos salvos na pasta do cliente
 
     > make clean_cliente
 

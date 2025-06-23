@@ -14,6 +14,7 @@ int main() {
   
     // cria pacote para enviar mensagens
     pacote_t *pack_send = cria_pacote();
+    pacote_t *pack_recv = cria_pacote();
 
     // cria uma mensagem de teste
     char string[] = "oiii";
@@ -21,7 +22,11 @@ int main() {
 
     envia_pacote(sock, pack_send);
 
+    recebe_dados(sock, pack_send, pack_recv);
+
+
     destroi_pacote(pack_send);
+    destroi_pacote(pack_recv);
     close(sock);
 
     return 0;

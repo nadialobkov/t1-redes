@@ -43,6 +43,42 @@ void destroi_pacote(pacote_t *pack) {
     return;
 }
 
+// imprime informacoes do pacote (tipo, tamanho, dados)
+void imprime_pacote(pacote_t *pack) {
+    
+    if (!pack) {
+        printf("Pacote inválido\n");
+        return;
+    }
+    printf("Pacote: ");
+    switch (pack->tipo) {
+        case ACK: printf("ACK\n"); break;
+        case NACK: printf("NACK\n"); break;
+        case OK: printf("OK\n"); break;
+        case SYN: printf("SYN\n"); break;
+        case TAM: printf("TAM\n"); break;
+        case DADOS: printf("DADOS\n"); break;
+        case TEXT: printf("TEXT\n"); break;
+        case VIDEO: printf("VIDEO\n"); break;
+        case IMG: printf("IMG\n"); break;
+        case FIM: printf("FIM\n"); break;
+        case DIR: printf("DIR\n"); break;
+        case CIMA: printf("CIMA\n"); break;
+        case BAIXO: printf("BAIXO\n"); break;
+        case ESQ: printf("ESQ\n"); break;
+        case ERRO: printf("ERRO\n"); break;
+        default: break;
+    }
+
+    printf("\tTamanho: %d bytes\n", pack->tam);
+    // copia dados para buffer para imprimir
+    uint8_t buffer[TAM_MAX+1];
+    strncpy(buffer, pack->dados, pack->tam);
+    buffer[TAM_MAX] = '\0';
+    printf("\tDados: %s\n", buffer);
+
+    return;
+}
 
 // Calcula checksum --------------------------------------------------------------------------------
 // Campos: tamanho + sequência + tipo + dados
@@ -87,10 +123,10 @@ unsigned int verifica_checksum(pacote_t *pack)
     if (checksum_original != pack->checksum)
         return 0;
     
-    printf("Checksum OK!\n");
 
     return 1;
 }
+
 
 
 // escreve as informacoes passadas no pacote 'pack'
@@ -138,12 +174,17 @@ void envia_pacote(int sock, pacote_t *pack) {
         perror("Erro ao enviar mensagem");
     }
 
+    #ifdef DEBUG
+    printf("Enviado: ");
+    imprime_pacote(pack);
+    #endif
+
     return;
 }
 
 // espera pacotes e verifica marcador de inicio
 // escreve em 'pack' o pacote recebido
-void recebe_pacote(int sock, pacote_t *pack) {
+uint8_t recebe_pacote(int sock, pacote_t *pack) {
 
     int bytes_lidos = 0;
     uint8_t marc = 0;
@@ -158,5 +199,54 @@ void recebe_pacote(int sock, pacote_t *pack) {
         marc = pack->marcador;
     }
 
+    #ifdef DEBUG
+    printf("Recebido: ");
+    imprime_pacote(pack);
+    #endif
+
+    return (pack->tipo);
+}
+
+// espera ate receber um pacote do tipo ACK
+// se recebeu outro tipo, reenvia a mesma mensagem
+// pack_send => pacote que contem a mensagem a ser enviada
+// pack_recv => pacote por onde vai recever a mensagem
+void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
+
+    while (recebe_pacote(sock, pack_recv) != ACK) {
+        envia_pacote(sock, pack_send); // reenvia
+    }
     return;
+}
+
+// faz a verificacao do checksum do pacote de recebimento (pack_recv)
+// em caso de sucesso, envia um ACK e retorna 1
+// caso contrario, envia NACK e retorna 0
+uint8_t verifica_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
+    // faz a verificacao dos dados
+    if (!verifica_checksum(pack_recv)) {
+        // se houve erro no checksum, envia um nack
+        escreve_pacote(pack_send, NACK, 0, 0, NULL);
+        envia_pacote(sock, pack_send);
+        return 0;
+    }
+    // se checksum esta correto, enviamos um ack
+    else {
+        escreve_pacote(pack_send, ACK, 0, 0, NULL);
+        envia_pacote(sock, pack_send);
+        return 1;
+    }
+}
+
+
+// espera o recebimento do pacote valido
+// recebe pacotes e faz sua verificacao com 'verifica_pacote' (logo, realiza o envio de ACKS e NACKS)
+// retorna o tipo do pacote recebido quando for verificado com sucesso
+uint8_t espera_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
+
+    do {
+        recebe_pacote(sock, pack_recv);
+    } while (!verifica_pacote(sock, pack_send, pack_recv));
+    
+    return (pack_recv->tipo);
 }
