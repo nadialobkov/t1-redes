@@ -104,16 +104,15 @@ uint8_t recebe_pacote(int sock, pacote_t *pack);
 // se recebeu outro tipo, reenvia a mesma mensagem
 void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv);
 
-// espera o recebimento do pacote de um determinado tipo
-// ao receber, verifica o checksum
-// se houve erro ele envia nack e continua esperando o correto
-// em caso de sucesso, para de esperar
-void espera_pacote(uint8_t tipo, int sock, pacote_t *pack_send, pacote_t *pack_recv);
+// faz a verificacao do checksum do pacote de recebimento (pack_recv)
+// em caso de sucesso, envia um ACK e retorna 1
+// caso contrario, envia NACK e retorna 0
+uint8_t verifica_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv);
 
-// espera um pacote de algum tipo de arquivo (TEXTO, IMG ou VIDEO)
-void espera_pacote_arquivo(int sock, pacote_t *pack_send, pacote_t *pack_recv);
-
-
+// espera o recebimento do pacote valido
+// recebe pacotes e faz sua verificacao com 'verifica_pacote' (logo, realiza o envio de ACKS e NACKS)
+// retorna o tipo do pacote recebido quando for verificado com sucesso
+uint8_t espera_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv);
 
 
 #endif

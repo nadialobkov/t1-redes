@@ -172,7 +172,7 @@ void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome)
 
 
     // abre arquivo
-    FILE *arq = fopen(path, "r");
+    FILE *arq = fopen(path, "rb");
     if (!arq) {
         perror("Erro ao abrir arquivo");
         return;
@@ -186,9 +186,8 @@ void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome)
     uint8_t seq = 0; // numero de sequencia
 
     // le dados do arquivo
-    while (fgets(dados, TAM_MAX, arq)) {
+    while ((bytes_lidos = fread(dados, 1, TAM_MAX, arq)) > 0) {
         seq %= 32; // numero de sequencia (0-31)
-        bytes_lidos = strnlen(dados, TAM_MAX);
         escreve_pacote(pack_send, DADOS, bytes_lidos, seq, dados);
         envia_pacote(sock, pack_send);
         // espera confimacao do recebimento do pacote
@@ -198,6 +197,7 @@ void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome)
 
     // chegou ao fim do arquivo, enviou tudo
     escreve_pacote(pack_send, FIM, 0, 0, NULL);
+    envia_pacote(sock, pack_send);
     espera_ack(sock, pack_send, pack_recv);
 
     fclose(arq);
@@ -212,44 +212,48 @@ void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome)
 void recebe_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 
     // espera receber pacote do tipo do arquivo
-    espera_pacote_arquivo(sock, pack_send, pack_recv);
+    espera_pacote(sock, pack_send, pack_recv);
 
     // guarda nome do arquivo (que foi passado no campo dados)
-    char nome[TAM_MAX+TAM_EXT];
-    strncpy(nome, pack_recv->dados, pack_recv->tam);
+    char nome[pack_recv->tam + 1];
+    memcpy(nome, pack_recv->dados, pack_recv->tam);
+    nome[pack_recv->tam] = '\0'; // adiciona caracter nulo ao final
 
-    // cria string para guardar nome do arquivo com extensao
-    char extensao[TAM_EXT];
-    if (pack_recv->tipo == IMG) { strcpy(extensao, ".jpg"); }
-    else if (pack_recv->tipo == VIDEO) { strcpy(extensao, ".mp4"); }
-    else { strcpy(extensao, ".txt"); }
-    // concatena nome e extensao
-    strncat(nome, extensao, TAM_MAX+TAM_EXT);
-    nome[TAM_MAX+TAM_EXT-1] = '\0'; // adiciona caracter nulo ao final
+    // cria caminho completo para o cliente
+    char path[256]; // Tamanho suficiente para o caminho
+    snprintf(path, sizeof(path), "./arq_cliente/%s", nome);
 
     // cria arquivo em modo de escrita
-    FILE *arq = fopen(nome, "w");
+    FILE *arq = fopen(path, "wb");
     if (!arq) {
         perror("Erro ao abrir o arquivo para escrita");
         return;
     }
 
+    fseek(arq, 0, SEEK_SET); // aponta para inicio do arquivo
+
     // recebe pacote do tamanho
-    espera_pacote(TAM, sock, pack_send, pack_recv);
+    espera_pacote(sock, pack_send, pack_recv);
     // ... precisa enviar mensagem de erro se nao tiver espaco
 
     // enquando nao recebeu mensagem de fim de arquivo
-    while (recebe_pacote(sock, pack_recv) != FIM) {
+    while (espera_pacote(sock, pack_send, pack_recv) != FIM) {
 
-        espera_pacote(DADOS, sock, pack_send, pack_recv);
-        // escreve no arquivo os dados recebidos
-        fputs(pack_recv->dados, arq);
+        if (pack_recv->tipo == DADOS) {
+            // verifica e escreve os dados
+            uint8_t escritos = fwrite(pack_recv->dados, 1, pack_recv->tam, arq);
+            if (escritos != pack_recv->tam) {
+                perror("Erro na escrita");
+                fclose(arq);
+                return;
+            }
+            fflush(arq); // força a escrita imediata
+        }
     }
-    espera_pacote(FIM, sock, pack_send, pack_recv); // para confirmar o fim
 
     fclose(arq);
 
-    exibe_arquivo(nome);
+    exibe_arquivo(path);
 
     return;
 }

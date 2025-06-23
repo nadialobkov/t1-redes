@@ -205,7 +205,7 @@ uint8_t recebe_pacote(int sock, pacote_t *pack) {
     imprime_pacote(pack);
     #endif
 
-    return (pack->tam);
+    return (pack->tipo);
 }
 
 // espera ate receber um pacote do tipo ACK
@@ -220,58 +220,34 @@ void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
     return;
 }
 
-
-// espera o recebimento do pacote de um determinado tipo
-// ao receber, verifica o checksum
-// se houve erro ele envia nack e continua esperando o correto
-// em caso de sucesso, envia ack e para de esperar
-void espera_pacote(uint8_t tipo, int sock, pacote_t *pack_send, pacote_t *pack_recv) {
-
-    while (1) {
-        // verifica se pacote recebido eh do tipo esperado
-        if (recebe_pacote(sock, pack_recv) == tipo) {
-            // faz a verificacao dos dados
-            if (!verifica_checksum(pack_recv)) {
-                // se houve erro no checksum, envia um nack
-                escreve_pacote(pack_send, NACK, 0, 0, NULL);
-                envia_pacote(sock, pack_send);
-            }
-            // se checksum esta correto, enviamos um ack
-            else {
-                escreve_pacote(pack_send, ACK, 0, 0, NULL);
-                envia_pacote(sock, pack_send);
-                // paramos de receber pacotes
-                break;
-            }
-        }
+// faz a verificacao do checksum do pacote de recebimento (pack_recv)
+// em caso de sucesso, envia um ACK e retorna 1
+// caso contrario, envia NACK e retorna 0
+uint8_t verifica_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
+    // faz a verificacao dos dados
+    if (!verifica_checksum(pack_recv)) {
+        // se houve erro no checksum, envia um nack
+        escreve_pacote(pack_send, NACK, 0, 0, NULL);
+        envia_pacote(sock, pack_send);
+        return 0;
     }
-    return;
+    // se checksum esta correto, enviamos um ack
+    else {
+        escreve_pacote(pack_send, ACK, 0, 0, NULL);
+        envia_pacote(sock, pack_send);
+        return 1;
+    }
 }
 
-// espera um pacote de algum tipo de arquivo (TEXTO, IMG ou VIDEO)
-void espera_pacote_arquivo(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 
-    while (1) {
-        printf("while do espera arq\n");
-        // verifica se pacote recebido eh algum tipo de arquivo
-        uint8_t tipo = recebe_pacote(sock, pack_recv);
-        if (tipo == IMG || tipo == VIDEO || tipo == TEXT) {
-            // faz a verificacao dos dados
-            if (!verifica_checksum(pack_recv)) {
-                printf("erro no checksum\n");
-                // se houve erro no checksum, envia um nack
-                escreve_pacote(pack_send, NACK, 0, 0, NULL);
-                envia_pacote(sock, pack_send);
-            }
-            // se checksum esta correto, enviamos um ack
-            else {
-                printf("checksum correto\n");
-                escreve_pacote(pack_send, ACK, 0, 0, NULL);
-                envia_pacote(sock, pack_send);
-                // paramos de receber pacotes
-                break;
-            }
-        }
-    }
-    return;
+// espera o recebimento do pacote valido
+// recebe pacotes e faz sua verificacao com 'verifica_pacote' (logo, realiza o envio de ACKS e NACKS)
+// retorna o tipo do pacote recebido quando for verificado com sucesso
+uint8_t espera_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
+
+    do {
+        recebe_pacote(sock, pack_recv);
+    } while (!verifica_pacote(sock, pack_send, pack_recv));
+    
+    return (pack_recv->tipo);
 }
