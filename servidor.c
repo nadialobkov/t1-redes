@@ -7,6 +7,7 @@
 
 #include "sock.h"
 #include "pacote.h"
+#include "timer.h"
 
 int main() {
 
@@ -15,6 +16,8 @@ int main() {
 
     pacote_t *pack_send = cria_pacote();
     pacote_t *pack_recv = cria_pacote();
+
+    inicia_timer();
 
     // espera conexao do cliente
     while (espera_pacote(sock, pack_send, pack_recv) != SYN);

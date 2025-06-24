@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "sock.h"
 #include "pacote.h"
+#include "timer.h"
 
 int main() {
 
@@ -16,10 +17,13 @@ int main() {
     pacote_t *pack_send = cria_pacote();
     pacote_t *pack_recv = cria_pacote();
 
+    inicia_timer(); 
+
     // inicia conexao enviando um pacote para sincronizar com o servidor
     escreve_pacote(pack_send, SYN, 0, 0, NULL);
     envia_pacote(sock, pack_send);
     espera_ack(sock, pack_send, pack_recv);
+
 
 
     recebe_dados(sock, pack_send, pack_recv);
