@@ -7,6 +7,7 @@
 #include "sock.h"
 #include "pacote.h"
 #include "timer.h"
+#include "jogo.h"
 
 int main() {
 
@@ -24,11 +25,17 @@ int main() {
     envia_pacote(sock, pack_send);
     espera_ack(sock, pack_send, pack_recv);
 
+    // cria jogador
+    struct jogador_t *jogador = cria_jogador();
+
+    
+
 
 
     recebe_dados(sock, pack_send, pack_recv);
 
 
+    destroi_jogador(jogador);
     destroi_pacote(pack_send);
     destroi_pacote(pack_recv);
     close(sock);
