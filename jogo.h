@@ -13,6 +13,16 @@
 #define MOVE_BAIXO 12
 #define MOVE_ESQ 13
 
+//Nome dos tesouros
+#define TES_0 "0.txt"
+#define TES_1 "1.txt"
+#define TES_2 "2.txt"
+#define TES_3 "3.jpg"
+#define TES_4 "4.txt"
+#define TES_5 "5.mp4"
+#define TES_6 "6.txt"
+#define TES_7 "7.jpg"
+
 //Estrutura Coordenadas
 struct coordenadas_t {
     unsigned int x;
@@ -81,10 +91,14 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, unsigned int direc
 //Retorno: numero do tesouro encontrado ou -1 caso nao encontrou tesouro
 int encontrou_tesouro(struct tabuleiro_t *tabuleiro);
 
+//Retorna nome do tesouro presente na posicao atual do jogador
+char *nome_tesouro(int num_tesouro);
+
 //Pode ser usado para o controle do laço das movimentações
 //Retorna 1 enquanto não tiver encontrado todos os tesouros e 0 quando tiver encontrado todos
 unsigned int procurando_tesouros(struct jogador_t *jogador);
 unsigned int procurando_tesouros_tabuleiro(struct tabuleiro_t *tabuleiro);
+
 
 //Para encerrar o jogo
 //Mostrar na tela do cliente uma mensagem de vitória

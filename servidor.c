@@ -20,8 +20,12 @@ int main() {
 
     inicia_timer();
 
+    limpa_terminal();
+
     // espera conexao do cliente
-    while (espera_pacote(sock, pack_send, pack_recv) != SYN);
+    while (espera_pacote(sock, pack_send, pack_recv) != SYN) {
+        printf("esperando syn\n");
+    };
 
     // cria tabuleiro para jogo
     struct tabuleiro_t *tabuleiro = cria_tabuleiro();
@@ -29,8 +33,9 @@ int main() {
     while (procurando_tesouros_tabuleiro(tabuleiro)) {
         // imprime informacoes do jogo
         infos_jogo(tabuleiro);
+        printf("Posicao jogador: [%d][%d]\n", tabuleiro->posicao_jogador.x, tabuleiro->posicao_jogador.y);
 
-        uint8_t tipo = recebe_pacote(sock, pack_recv);
+        uint8_t tipo = espera_pacote(sock, pack_send, pack_recv);
         // espera receber pacote de movimento
         uint8_t movimento_possivel = 0;
         switch (tipo)
@@ -55,21 +60,33 @@ int main() {
 
         if (movimento_possivel) {
             // descobre se encontrou tesouro na posicao
-            if (encontrou_tesouro(tabuleiro)) {
+            int tesouro = encontrou_tesouro(tabuleiro); // devolve numero do tesouro
+            if (tesouro >= 0) {
+                // achou tesouro
                 msg = TESOURO;
                 escreve_pacote(pack_send, OK, 1, 0, &msg);
                 envia_pacote(sock, pack_send);
                 espera_ack(sock, pack_send, pack_recv);
-                envia_dados(sock, pack_send, pack_recv, nome_tesouro(tabuleiro));
-
+                // vai enviar arquivo
+                envia_dados(sock, pack_send, pack_recv, nome_tesouro(tesouro));
             }
+            else {
+                // nao encontrou tesouro
+                msg = NORMAL; // posicao normal
+                escreve_pacote(pack_send, OK, 1, 0, &msg);
+                espera_ack(sock, pack_send, pack_recv);
+            }
+        }
+        else {
+            // movimento invalido
+            msg = MOVE_INV;
+            escreve_pacote(pack_send, ERRO, 1, 0, &msg);
+            envia_pacote(sock, pack_send);
+            espera_ack(sock, pack_send, pack_recv);
         }
 
     }
 
-    
-    
-    envia_dados(sock, pack_send, pack_recv, "medio.txt");
 
     destroi_tabuleiro(tabuleiro);
     destroi_pacote(pack_recv);

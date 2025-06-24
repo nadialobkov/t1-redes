@@ -263,8 +263,11 @@ uint8_t verifica_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 // retorna o tipo do pacote recebido quando for verificado com sucesso
 uint8_t espera_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 
+    uint8_t tipo = 0;
     do {
-        recebe_pacote(sock, pack_recv);
+        do {
+            tipo = recebe_pacote(sock, pack_recv);
+        } while (tipo == TIMEOUT);
     } while (!verifica_pacote(sock, pack_send, pack_recv));
     
     return (pack_recv->tipo);

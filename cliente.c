@@ -20,6 +20,8 @@ int main() {
 
     inicia_timer(); 
 
+    limpa_terminal();
+
     // inicia conexao enviando um pacote para sincronizar com o servidor
     escreve_pacote(pack_send, SYN, 0, 0, NULL);
     envia_pacote(sock, pack_send);
@@ -28,9 +30,11 @@ int main() {
     // cria jogador
     struct jogador_t *jogador = cria_jogador();
 
+
     while (procurando_tesouros(jogador)) {
 
         imprime_mapa(jogador);
+        // printf("Posicao jogador: [%d][%d]\n", jogador->pos_x, jogador->pos_y);
 
         uint8_t move = le_movimento();
         // escreve pacote com base no movimento
@@ -54,7 +58,6 @@ int main() {
             default:
                 // tecla invalida, repete while
                 limpa_terminal();
-                printf("Tecla inválida! Pressione uma das setas!\n");
                 continue;
                 break;
         }
@@ -81,8 +84,8 @@ int main() {
                 printf("Bateu na parede! 🤕");
             }
         }
-        
         limpa_terminal();
+        
     }
 
     mensagem_vitoria(jogador);

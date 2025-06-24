@@ -126,6 +126,8 @@ void imprime_mapa(struct jogador_t *jogador)
     printf("⚔️ 💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠💠⚔️\n");
 }
 
+
+
 void desativa_modo_canonico(struct termios *old)
 {
     struct termios nova;
@@ -239,7 +241,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, unsigned int direc
             if (tabuleiro->posicao_jogador.x == 7)
                 return 0;                   //Não é possível movimentar
             
-            tabuleiro->posicao_jogador.x++;
+            (tabuleiro->posicao_jogador.x)++;
             break;
 
         //Cima
@@ -247,7 +249,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, unsigned int direc
             if (tabuleiro->posicao_jogador.y == 7)
                 return 0;                   //Não é possível movimentar
             
-            tabuleiro->posicao_jogador.y++;
+            (tabuleiro->posicao_jogador.y)++;
             break;
 
         //Baixo
@@ -255,7 +257,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, unsigned int direc
             if (tabuleiro->posicao_jogador.y == 0)
                 return 0;                   //Não é possível movimentar
             
-            tabuleiro->posicao_jogador.y--;
+            (tabuleiro->posicao_jogador.y)--;
             break;
 
         //Esquerda
@@ -263,7 +265,7 @@ unsigned int movimenta_jogador(struct tabuleiro_t *tabuleiro, unsigned int direc
             if (tabuleiro->posicao_jogador.x == 0)
                 return 0;                   //Não é possível movimentar
             
-            tabuleiro->posicao_jogador.x--;
+            (tabuleiro->posicao_jogador.x--);
             break;
     }
 
@@ -301,6 +303,40 @@ int encontrou_tesouro(struct tabuleiro_t *tabuleiro)
     return -1;
 }
 
+char *nome_tesouro(int num_tesouro) 
+{
+    switch (num_tesouro)
+    {
+        case 0:
+            return TES_0;
+            break;
+        case 1:
+            return TES_1;
+            break;
+        case 2:
+            return TES_2;
+            break;
+        case 3:
+            return TES_3;
+            break;
+        case 4:
+            return TES_4;
+            break;
+        case 5:
+            return TES_5;
+            break;
+        case 6:
+            return TES_6;
+            break;
+        case 7:
+            return TES_7;
+            break;
+        
+        default:
+            return NULL;
+            break;
+    }
+}
 
 unsigned int procurando_tesouros(struct jogador_t *jogador)
 {
