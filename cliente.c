@@ -28,11 +28,64 @@ int main() {
     // cria jogador
     struct jogador_t *jogador = cria_jogador();
 
-    
+    while (procurando_tesouros(jogador)) {
 
+        imprime_mapa(jogador);
 
+        uint8_t move = le_movimento();
+        // escreve pacote com base no movimento
+        switch (move) {
+            case MOVE_CIMA:
+                escreve_pacote(pack_send, CIMA, 0, 0, NULL);
+                break;
 
-    recebe_dados(sock, pack_send, pack_recv);
+            case MOVE_BAIXO:
+                escreve_pacote(pack_send, BAIXO, 0, 0, NULL);
+                break;
+
+            case MOVE_DIR:
+                escreve_pacote(pack_send, DIR, 0, 0, NULL);
+                break;
+                
+            case MOVE_ESQ:
+                escreve_pacote(pack_send, ESQ, 0, 0, NULL);
+                break;
+            
+            default:
+                // tecla invalida, repete while
+                limpa_terminal();
+                printf("Tecla inválida! Pressione uma das setas!\n");
+                continue;
+                break;
+        }
+        envia_pacote(sock, pack_send);
+        uint8_t tipo = espera_pacote(sock, pack_send, pack_recv);
+
+        // trata pacote recebido
+        
+        uint8_t msg;
+
+        if (tipo == OK) {
+            msg = dado_pacote(pack_recv);
+            if (msg == NORMAL) {
+                atualiza_jogador(jogador, move, SEM_TESOURO_VISITADA);
+            }
+            else if (msg == TESOURO) {
+                atualiza_jogador(jogador, move, COM_TESOURO_VISITADA);
+                recebe_dados(sock, pack_send, pack_recv);
+            }
+        }
+        else if (tipo == ERRO) {
+            msg = dado_pacote(pack_recv);
+            if (msg == MOVE_INV) {
+                printf("Bateu na parede! 🤕");
+            }
+        }
+        
+        limpa_terminal();
+    }
+
+    mensagem_vitoria(jogador);
 
 
     destroi_jogador(jogador);

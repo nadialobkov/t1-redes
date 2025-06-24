@@ -15,7 +15,7 @@
 #define DADOS   5
 #define TEXT    6   // texto + ack + nome
 #define VIDEO   7   // video + ack + nome
-#define IMG     8   // imagem +ack + nome
+#define IMG     8   // imagem + ack + nome
 #define FIM     9   
 #define DIR     10  // desloca para direita
 #define CIMA    11  // desloca para cima     
@@ -28,7 +28,11 @@
 // codigos de erros
 #define SEM_PERM    0   // sem permissao de acesso
 #define SEM_ESP     1   // espaco insuficiente
-#define MARC_ERRO   2   // marcador de início errado
+#define MOVE_INV    2   // movimento invalido no tabuleiro
+
+// codigos para o OK
+#define NORMAL      0   // posicao normal (vazia)
+#define TESOURO     1   // posicao com tesouro
 
 // tamanhos
 #define TAM_MAX 127     // tamanho do campo de dados
@@ -70,6 +74,10 @@ void destroi_pacote(pacote_t *pack);
 
 // imprime informacoes do pacote (tipo, tamanho, dados)
 void imprime_pacote(pacote_t *pack);
+
+// retorna o primeiro byte de dados
+// util para pacotes do tipo OK e ERRO (contem um codigo)
+uint8_t dado_pacote(pacote_t *pack);
 
 // calcula a soma dos bits dos campos tamanho, sequência, tipo e dados
 //Guarda o valor no pacote

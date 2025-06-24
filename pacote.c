@@ -81,6 +81,17 @@ void imprime_pacote(pacote_t *pack) {
     return;
 }
 
+// retorna o primeiro byte de dados
+uint8_t dado_pacote(pacote_t *pack) {
+    if (pack->tam == 1) {
+        return (pack->dados[0]);
+    }
+    else {
+        perror("Pacote não tem um único byte");
+        return 0;
+    }
+}
+
 // Calcula checksum --------------------------------------------------------------------------------
 // Campos: tamanho + sequência + tipo + dados
 // OBS: Soma o campo dos dados somente até a quantidade indicada pelo tamanho

@@ -24,6 +24,7 @@ struct tabuleiro_t {
     unsigned int posicoes[8][8];               //matriz de posições (são 64 posições disponíveis)
     struct coordenadas_t posicao_tesouro[8];   //coordenadas x e y dos tesouros
     struct coordenadas_t posicao_jogador;
+    unsigned int tesouros;              //numero de tesouros que o jogador encontrou
 };
 
 //Estrutura Jogador
@@ -83,6 +84,7 @@ int encontrou_tesouro(struct tabuleiro_t *tabuleiro);
 //Pode ser usado para o controle do laço das movimentações
 //Retorna 1 enquanto não tiver encontrado todos os tesouros e 0 quando tiver encontrado todos
 unsigned int procurando_tesouros(struct jogador_t *jogador);
+unsigned int procurando_tesouros_tabuleiro(struct tabuleiro_t *tabuleiro);
 
 //Para encerrar o jogo
 //Mostrar na tela do cliente uma mensagem de vitória

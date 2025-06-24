@@ -25,8 +25,47 @@ int main() {
 
     // cria tabuleiro para jogo
     struct tabuleiro_t *tabuleiro = cria_tabuleiro();
-    // imprime informacoes do jogo
-    infos_jogo(tabuleiro);
+
+    while (procurando_tesouros_tabuleiro(tabuleiro)) {
+        // imprime informacoes do jogo
+        infos_jogo(tabuleiro);
+
+        uint8_t tipo = recebe_pacote(sock, pack_recv);
+        // espera receber pacote de movimento
+        uint8_t movimento_possivel = 0;
+        switch (tipo)
+        {
+            case CIMA:
+                movimento_possivel = movimenta_jogador(tabuleiro, MOVE_CIMA);
+                break;
+            case BAIXO:
+                movimento_possivel = movimenta_jogador(tabuleiro, MOVE_BAIXO);
+                break;
+            case DIR:
+                movimento_possivel = movimenta_jogador(tabuleiro, MOVE_DIR);
+                break;
+            case ESQ:
+                movimento_possivel = movimenta_jogador(tabuleiro, MOVE_ESQ);
+                break;
+            
+            default:
+                break;
+        }
+        uint8_t msg; // mensagem adicional
+
+        if (movimento_possivel) {
+            // descobre se encontrou tesouro na posicao
+            if (encontrou_tesouro(tabuleiro)) {
+                msg = TESOURO;
+                escreve_pacote(pack_send, OK, 1, 0, &msg);
+                envia_pacote(sock, pack_send);
+                espera_ack(sock, pack_send, pack_recv);
+                envia_dados(sock, pack_send, pack_recv, nome_tesouro(tabuleiro));
+
+            }
+        }
+
+    }
 
     
     

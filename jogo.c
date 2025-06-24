@@ -57,6 +57,9 @@ struct tabuleiro_t* cria_tabuleiro()
     tabuleiro->posicao_jogador.x = 0;
     tabuleiro->posicao_jogador.y = 0;
 
+    // tesouros encontrados
+    tabuleiro->tesouros = 0;
+
     return tabuleiro;
 }
 
@@ -282,6 +285,9 @@ int encontrou_tesouro(struct tabuleiro_t *tabuleiro)
         //Atualiza o tabuleiro
         tabuleiro->posicoes[tabuleiro->posicao_jogador.x][tabuleiro->posicao_jogador.y] = COM_TESOURO_VISITADA;
         
+        // conta tesouro encontrado
+        tabuleiro->tesouros++;
+
         // retorna numero do tesouro encontrado
         return i;
     }
@@ -304,6 +310,14 @@ unsigned int procurando_tesouros(struct jogador_t *jogador)
     return 1;           //ainda procurando
 }
 
+unsigned int procurando_tesouros_tabuleiro(struct tabuleiro_t *tabuleiro)
+{
+    if (tabuleiro->tesouros >= 8)
+        return 0;       //encontrou os 8 tesouros
+    
+    return 1;           //ainda procurando
+}
+
 void mensagem_vitoria(struct jogador_t *jogador)
 {
     printf("            ⚜️ 🏆 𝕍𝕠𝕔ê 𝕍𝕖𝕟𝕔𝕖𝕦!!! 🏆⚜️\n");
@@ -321,7 +335,7 @@ void infos_jogo(struct tabuleiro_t *tabuleiro)
 {
     printf("Informações Do Jogo - Caça ao Tesouro\n");
     printf("┌─────────────────────────────────────────┐ \n");
-    // printf("│Número de Casas Percorridas: %d          │ \n", jogador->casas_percorridas);
+    printf("│Número de Tesouros encontrados: %d        │ \n", tabuleiro->tesouros);
     printf("│Posições dos Tesouros:                   │ \n");
     for (int i = 0; i < 8; i++)
         printf("│ID: %d -> (%d, %d)                          │\n", i, tabuleiro->posicao_tesouro[i].x, tabuleiro->posicao_tesouro[i].y);
