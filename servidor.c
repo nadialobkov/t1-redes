@@ -74,6 +74,7 @@ int main() {
                 // nao encontrou tesouro
                 msg = NORMAL; // posicao normal
                 escreve_pacote(pack_send, OK, 1, 0, &msg);
+                envia_pacote(sock, pack_send);
                 espera_ack(sock, pack_send, pack_recv);
             }
         }

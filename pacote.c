@@ -227,7 +227,7 @@ uint8_t recebe_pacote(int sock, pacote_t *pack) {
 }
 
 // espera ate receber um pacote do tipo ACK
-// se recebeu outro tipo, reenvia a mesma mensagem
+// se recebeu outro tipo, reenvia a mesma mensagem ou deu timeout 
 // pack_send => pacote que contem a mensagem a ser enviada
 // pack_recv => pacote por onde vai recever a mensagem
 void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv) {

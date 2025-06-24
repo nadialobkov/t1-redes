@@ -20,20 +20,21 @@ int main() {
 
     inicia_timer(); 
 
+    // cria jogador
+    struct jogador_t *jogador = cria_jogador();
+
     limpa_terminal();
+    imprime_mapa(jogador);
 
     // inicia conexao enviando um pacote para sincronizar com o servidor
     escreve_pacote(pack_send, SYN, 0, 0, NULL);
     envia_pacote(sock, pack_send);
     espera_ack(sock, pack_send, pack_recv);
 
-    // cria jogador
-    struct jogador_t *jogador = cria_jogador();
 
 
     while (procurando_tesouros(jogador)) {
 
-        imprime_mapa(jogador);
         // printf("Posicao jogador: [%d][%d]\n", jogador->pos_x, jogador->pos_y);
 
         uint8_t move = le_movimento();
@@ -57,11 +58,11 @@ int main() {
             
             default:
                 // tecla invalida, repete while
-                limpa_terminal();
                 continue;
                 break;
         }
         envia_pacote(sock, pack_send);
+        espera_ack(sock, pack_send, pack_recv);
         uint8_t tipo = espera_pacote(sock, pack_send, pack_recv);
 
         // trata pacote recebido
@@ -77,6 +78,8 @@ int main() {
                 atualiza_jogador(jogador, move, COM_TESOURO_VISITADA);
                 recebe_dados(sock, pack_send, pack_recv);
             }
+            limpa_terminal();
+            imprime_mapa(jogador);
         }
         else if (tipo == ERRO) {
             msg = dado_pacote(pack_recv);
@@ -84,7 +87,7 @@ int main() {
                 printf("Bateu na parede! 🤕");
             }
         }
-        limpa_terminal();
+        // limpa_terminal();
         
     }
 
