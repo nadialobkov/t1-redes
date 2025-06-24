@@ -21,7 +21,7 @@
 #define CIMA    11  // desloca para cima     
 #define BAIXO   12  // desloca para baixo
 #define ESQ     13  // desloca para esquerda
-// #define LIVRE 14 
+#define TIMEOUT 14  // tipo auxiliar que indica que houve timeout
 #define ERRO    15
 
 

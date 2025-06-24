@@ -12,6 +12,7 @@
 
 #include "sock.h"
 #include "pacote.h"
+#include "timer.h"
 
 
 // -----------------------------------------------------------------------------------------------
@@ -186,15 +187,22 @@ void envia_pacote(int sock, pacote_t *pack) {
 // escreve em 'pack' o pacote recebido
 uint8_t recebe_pacote(int sock, pacote_t *pack) {
 
+    unsigned int timeout;
     int bytes_lidos = 0;
     uint8_t marc = 0;
 
     // enquanto nao for o marcador de inicio
     while (marc != MARC) {
-        // vai ficar esperando mensagens ate receber algo
+        // vai ficar esperando mensagens ate receber algo ou dar timeout
         do {
             bytes_lidos = recv(sock, pack, TAM_PAC, 0);
-        } while (bytes_lidos <= 0);
+            timeout = deu_timeout();
+        } while ((bytes_lidos <= 0) && !timeout);
+
+        // se deu timeout, sai do laco retornando aviso de timeout
+        if (timeout) {
+            return TIMEOUT;
+        }
 
         marc = pack->marcador;
     }
@@ -213,7 +221,7 @@ uint8_t recebe_pacote(int sock, pacote_t *pack) {
 // pack_recv => pacote por onde vai recever a mensagem
 void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 
-    while (recebe_pacote(sock, pack_recv) != ACK) {
+    while (deu_timeout() || (recebe_pacote(sock, pack_recv) != ACK)) {
         envia_pacote(sock, pack_send); // reenvia
     }
     return;
