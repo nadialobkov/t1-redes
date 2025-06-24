@@ -16,12 +16,9 @@ int main() {
     pacote_t *pack_send = cria_pacote();
     pacote_t *pack_recv = cria_pacote();
 
-    recebe_pacote(sock, pack_recv);
+    // espera conexao do cliente
+    while (espera_pacote(sock, pack_send, pack_recv) != SYN);
     
-    // adiciona \0 para poder imprimir
-    pack_recv->dados[pack_recv->tam] = '\0';
-    printf("mensagem recebida: %s\n", pack_recv->dados);
-
     envia_dados(sock, pack_send, pack_recv, "medio.txt");
 
     destroi_pacote(pack_recv);

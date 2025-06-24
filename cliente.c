@@ -16,11 +16,11 @@ int main() {
     pacote_t *pack_send = cria_pacote();
     pacote_t *pack_recv = cria_pacote();
 
-    // cria uma mensagem de teste
-    char string[] = "oiii";
-    escreve_pacote(pack_send, DADOS, 4, 0, string);
-
+    // inicia conexao enviando um pacote para sincronizar com o servidor
+    escreve_pacote(pack_send, SYN, 0, 0, NULL);
     envia_pacote(sock, pack_send);
+    espera_ack(sock, pack_send, pack_recv);
+
 
     recebe_dados(sock, pack_send, pack_recv);
 
