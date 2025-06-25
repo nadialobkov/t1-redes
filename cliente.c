@@ -39,35 +39,35 @@ int main() {
         //Ainda precisa tratar se recebeu ack, nack ou erro 
         ssize_t envio = send(sock, pack, 131, 0);
         if (envio >= 0) {
-            printf("%d bytes enviados\n", envio);
+            // printf("%d bytes enviados\n", envio);
 
-                // aloca um espaco para um um vetor de pacotes que vai ter arquivo de no max 128 * 10 000 bytes
-                struct pacote **packets = malloc(10000 * sizeof(struct pacote *));
+            //     // aloca um espaco para um um vetor de pacotes que vai ter arquivo de no max 128 * 10 000 bytes
+            //     struct pacote **packets = malloc(10000 * sizeof(struct pacote *));
 
-                uint8_t i = 0;
-                packets[i] = malloc(sizeof(struct pacote));
+            //     uint8_t i = 0;
+            //     packets[i] = malloc(sizeof(struct pacote));
 
-                while (1) {
-                    // recebe pacotes
-                    printf("recebendo pacotes\n");
-                    recv(sock, packets[i], 131, 0);
-                    printf("indo testar marcador\n");
-                    printf("marcador[%d] = %d\n", i, packets[i]->marcador);
-                    if (packets[i]->marcador == MARC){ // verifica marcador
-                        printf("testando marcador\n");
-                        if (packets[i]->tipo == DADOS) {
-                            //printf("pacote dados\n");
-                            i++;
-                            packets[i] = malloc(sizeof(struct pacote));
-                        }
-                        if (packets[i]->tipo == FIM) {
-                            //printf("último pacote\n");
-                            interpreta_pacotes_dados(packets, i, "arquivo.txt");
-                            printf("recebeuu!\n");
-                            break;
-                        }
-                    }
-                }
+            //     while (1) {
+            //         // recebe pacotes
+            //         printf("recebendo pacotes\n");
+            //         recv(sock, packets[i], 131, 0);
+            //         printf("indo testar marcador\n");
+            //         printf("marcador[%d] = %d\n", i, packets[i]->marcador);
+            //         if (packets[i]->marcador == MARC){ // verifica marcador
+            //             printf("testando marcador\n");
+            //             if (packets[i]->tipo == DADOS) {
+            //                 //printf("pacote dados\n");
+            //                 i++;
+            //                 packets[i] = malloc(sizeof(struct pacote));
+            //             }
+            //             if (packets[i]->tipo == FIM) {
+            //                 //printf("último pacote\n");
+            //                 interpreta_pacotes_dados(packets, i, "arquivo.txt");
+            //                 printf("recebeuu!\n");
+            //                 break;
+            //             }
+            //         }
+            //     }
 
         }
         else {
@@ -75,7 +75,7 @@ int main() {
         }
         
         printf("vou entrar no if dos tipos de mensagem\n");
-        trata_ack_nack_erro(resposta_servidor, pack, sock, envio);
+        // trata_ack_nack_erro(resposta_servidor, pack, sock, envio);
     }
 
     close(sock);
