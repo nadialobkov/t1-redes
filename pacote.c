@@ -81,6 +81,17 @@ void imprime_pacote(pacote_t *pack) {
     return;
 }
 
+// retorna o primeiro byte de dados
+uint8_t dado_pacote(pacote_t *pack) {
+    if (pack->tam == 1) {
+        return (pack->dados[0]);
+    }
+    else {
+        perror("Pacote não tem um único byte");
+        return 0;
+    }
+}
+
 // Calcula checksum --------------------------------------------------------------------------------
 // Campos: tamanho + sequência + tipo + dados
 // OBS: Soma o campo dos dados somente até a quantidade indicada pelo tamanho
@@ -216,7 +227,7 @@ uint8_t recebe_pacote(int sock, pacote_t *pack) {
 }
 
 // espera ate receber um pacote do tipo ACK
-// se recebeu outro tipo, reenvia a mesma mensagem
+// se recebeu outro tipo, reenvia a mesma mensagem ou deu timeout 
 // pack_send => pacote que contem a mensagem a ser enviada
 // pack_recv => pacote por onde vai recever a mensagem
 void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
@@ -252,8 +263,11 @@ uint8_t verifica_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 // retorna o tipo do pacote recebido quando for verificado com sucesso
 uint8_t espera_pacote(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 
+    uint8_t tipo = 0;
     do {
-        recebe_pacote(sock, pack_recv);
+        do {
+            tipo = recebe_pacote(sock, pack_recv);
+        } while (tipo == TIMEOUT);
     } while (!verifica_pacote(sock, pack_send, pack_recv));
     
     return (pack_recv->tipo);

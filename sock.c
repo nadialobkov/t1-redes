@@ -147,7 +147,7 @@ void exibe_arquivo(const char *caminho_arquivo)
 void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome) {
 
     // adiciona caminho do arquivo que esta no servidor
-    char path[150] = "./arq_servidor/";
+    char path[150] = "./tesouros/";
     strncat(path, nome, 150); // concatena
 
     // envia nome do arquivo 
