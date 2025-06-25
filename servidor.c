@@ -23,17 +23,18 @@ int main() {
     limpa_terminal();
 
     // espera conexao do cliente
-    while (espera_pacote(sock, pack_send, pack_recv) != SYN) {
-        printf("esperando syn\n");
-    };
+    while (espera_pacote(sock, pack_send, pack_recv) != SYN);
 
     // cria tabuleiro para jogo
     struct tabuleiro_t *tabuleiro = cria_tabuleiro();
 
     while (procurando_tesouros_tabuleiro(tabuleiro)) {
         // imprime informacoes do jogo
+        #ifndef DEBUG
         limpa_terminal();
+        #endif
         infos_jogo(tabuleiro);
+
 
         uint8_t tipo = espera_pacote(sock, pack_send, pack_recv);
         // espera receber pacote de movimento

@@ -112,7 +112,7 @@ void imprime_mapa(struct jogador_t *jogador)
             else if (jogador->mapa[i][k] == COM_TESOURO_VISITADA)
                 printf("│ 🎖️  │ ");
             else if (jogador->mapa[i][k] == SEM_TESOURO_VISITADA)
-                printf("│ ❤️  │ ");   //mudar
+                printf("│ ❤️  │ ");   
             else
                 printf("│ 🤍 │ ");
         }

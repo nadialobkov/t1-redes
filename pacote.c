@@ -47,6 +47,7 @@ void destroi_pacote(pacote_t *pack) {
 // imprime informacoes do pacote (tipo, tamanho, dados)
 void imprime_pacote(pacote_t *pack) {
     
+    printf("- - - - - - - - - - - - - - - - - - -\n");
     if (!pack) {
         printf("Pacote inválido\n");
         return;
@@ -71,12 +72,13 @@ void imprime_pacote(pacote_t *pack) {
         default: break;
     }
 
+    printf("\tNúmero sequencia: %d\n", pack->seq);
     printf("\tTamanho: %d bytes\n", pack->tam);
     // copia dados para buffer para imprimir
-    uint8_t buffer[TAM_MAX+1];
+    uint8_t buffer[pack->tam+1];
     strncpy(buffer, pack->dados, pack->tam);
-    buffer[TAM_MAX] = '\0';
-    printf("\tDados: %s\n", buffer);
+    buffer[pack->tam] = '\0';
+    printf("\tDados: %s\n\n", buffer);
 
     return;
 }

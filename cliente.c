@@ -23,8 +23,10 @@ int main() {
     // cria jogador
     struct jogador_t *jogador = cria_jogador();
 
+    #ifndef DEBUG
     limpa_terminal();
     imprime_mapa(jogador);
+    #endif
 
     // inicia conexao enviando um pacote para sincronizar com o servidor
     escreve_pacote(pack_send, SYN, 0, 0, NULL);
@@ -78,8 +80,10 @@ int main() {
                 atualiza_jogador(jogador, move, COM_TESOURO_VISITADA);
                 recebe_dados(sock, pack_send, pack_recv);
             }
+            #ifndef DEBUG
             limpa_terminal();
             imprime_mapa(jogador);
+            #endif 
         }
         else if (tipo == ERRO) {
             msg = dado_pacote(pack_recv);
