@@ -78,6 +78,7 @@ int main() {
                 envia_pacote(sock, pack_send);
                 espera_ack(sock, pack_send, pack_recv);
             }
+            continue;
         }
         else {
             // movimento invalido

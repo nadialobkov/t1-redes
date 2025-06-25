@@ -139,6 +139,16 @@ void exibe_arquivo(const char *caminho_arquivo)
 
 //----------------------------------------------------------------------------------------------------------------------
 
+void unescape_dados(uint8_t *dados, uint8_t tam) {
+    for(int i = 0; i < tam-1; i++) {
+        if((dados[i] == 0x88 || dados[i] == 0x81) && dados[i+1] == 0xff) {
+            // remove o byte de escape, muda para zero
+            dados[i+1] = 0;
+        }
+    }
+}
+//----------------------------------------------------------------------------------------------------------------------
+
 // funcao recebe sockets, pacotes (previamente alocados) e nome do arquivo a ser enviado
 // eh enviado o nome do arquivo, tamanho e em seguida os dados do arquivo
 // o arquivo eh quebrado em partes (sequencializadas) para entrar no campo de dados
@@ -183,16 +193,34 @@ void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome)
     // vai percorrer o arquivo lendo 'TAM_MAX' bytes para enviar nos pacotes
     char dados[TAM_MAX];
     uint8_t bytes_lidos;
+    uint8_t byte;
     uint8_t seq = 0; // numero de sequencia
+    uint8_t i = 0; // iterador para contar bytes lidos
 
     // le dados do arquivo
-    while ((bytes_lidos = fread(dados, 1, TAM_MAX, arq)) > 0) {
-        seq %= 32; // numero de sequencia (0-31)
-        escreve_pacote(pack_send, DADOS, bytes_lidos, seq, dados);
-        envia_pacote(sock, pack_send);
-        // espera confimacao do recebimento do pacote
-        espera_ack(sock, pack_send, pack_recv);
-        seq++;
+    while (fread(&byte, 1, 1, arq) > 0) {
+
+        if (i < TAM_MAX-1) {
+            // ainda eh possivel escrever nos dados
+            dados[i] = byte;
+            i++;
+            // verifica se eh byte especial
+            if (byte == 0x81 || byte == 0x88) {
+                dados[i] = 0xff; // adiciona escape antes
+                i++;
+        }
+        }
+        else {
+            // acabou o tamanho disponivel no buffer de dados
+            // envia mensagem
+            seq %= 32; // numero de sequencia (0-31)
+            escreve_pacote(pack_send, DADOS, i, seq, dados);
+            envia_pacote(sock, pack_send);
+            // espera confimacao do recebimento do pacote
+            espera_ack(sock, pack_send, pack_recv);
+            seq++;
+            i = 0; // zera contador
+        }
     }
 
     // chegou ao fim do arquivo, enviou tudo
@@ -241,6 +269,7 @@ void recebe_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 
         if (pack_recv->tipo == DADOS) {
             // verifica e escreve os dados
+            unescape_dados(pack_recv->dados, pack_recv->tam);
             uint8_t escritos = fwrite(pack_recv->dados, 1, pack_recv->tam, arq);
             if (escritos != pack_recv->tam) {
                 perror("Erro na escrita");

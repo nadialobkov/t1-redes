@@ -47,7 +47,7 @@ void destroi_pacote(pacote_t *pack) {
 // imprime informacoes do pacote (tipo, tamanho, dados)
 void imprime_pacote(pacote_t *pack) {
     
-    printf("- - - - - - - - - - - - - - - - - - -\n");
+    printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
     if (!pack) {
         printf("Pacote inválido\n");
         return;
@@ -75,10 +75,20 @@ void imprime_pacote(pacote_t *pack) {
     printf("\tNúmero sequencia: %d\n", pack->seq);
     printf("\tTamanho: %d bytes\n", pack->tam);
     // copia dados para buffer para imprimir
-    uint8_t buffer[pack->tam+1];
+    uint8_t buffer[pack->tam];
     strncpy(buffer, pack->dados, pack->tam);
-    buffer[pack->tam] = '\0';
-    printf("\tDados: %s\n\n", buffer);
+    printf("\tDados:\n");
+    // formatacao dados em hexa
+    for (int i = 0; i < pack->tam; i ++) {
+        if ((i % 16) == 0) {
+            printf("\t\t");
+        }
+        printf("%2x ", buffer[i]);
+        if ((i % 16) == 15) {
+            printf("\n");
+        }
+    }
+    printf("\n");
 
     return;
 }
