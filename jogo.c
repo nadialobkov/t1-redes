@@ -112,9 +112,9 @@ void imprime_mapa(struct jogador_t *jogador)
             else if (jogador->mapa[i][k] == COM_TESOURO_VISITADA)
                 printf("│ 🎖️  │ ");
             else if (jogador->mapa[i][k] == SEM_TESOURO_VISITADA)
-                printf("│ ❌ │ ");   //mudar
+                printf("│ ❤️  │ ");   //mudar
             else
-                printf("│ ⚜️  │ ");
+                printf("│ 🤍 │ ");
         }
         printf("\n");
 
@@ -369,11 +369,15 @@ void limpa_terminal() {
 
 void infos_jogo(struct tabuleiro_t *tabuleiro)
 {
-    printf("Informações Do Jogo - Caça ao Tesouro\n");
+    printf("\n Informações Do Jogo - Caça ao Tesouro\n");
     printf("┌─────────────────────────────────────────┐ \n");
-    printf("│Número de Tesouros encontrados: %d        │ \n", tabuleiro->tesouros);
-    printf("│Posições dos Tesouros:                   │ \n");
+    printf("│ Número de Tesouros encontrados: %d       │ \n", tabuleiro->tesouros);
+    printf("│                                         │\n");
+    printf("│ Posições dos Tesouros:                  │ \n");
     for (int i = 0; i < 8; i++)
-        printf("│ID: %d -> (%d, %d)                          │\n", i, tabuleiro->posicao_tesouro[i].x, tabuleiro->posicao_tesouro[i].y);
+        printf("│ ID: %d -> (%d, %d)                         │\n", i, tabuleiro->posicao_tesouro[i].x, tabuleiro->posicao_tesouro[i].y);
+    
+    printf("│                                         │\n");
+    printf("│ Posicao jogador: (%d, %d)                 │\n", tabuleiro->posicao_jogador.x, tabuleiro->posicao_jogador.y);
     printf("└─────────────────────────────────────────┘ \n");
 }

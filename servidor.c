@@ -32,8 +32,8 @@ int main() {
 
     while (procurando_tesouros_tabuleiro(tabuleiro)) {
         // imprime informacoes do jogo
+        limpa_terminal();
         infos_jogo(tabuleiro);
-        printf("Posicao jogador: [%d][%d]\n", tabuleiro->posicao_jogador.x, tabuleiro->posicao_jogador.y);
 
         uint8_t tipo = espera_pacote(sock, pack_send, pack_recv);
         // espera receber pacote de movimento
