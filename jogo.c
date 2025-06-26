@@ -223,6 +223,13 @@ void atualiza_jogador(struct jogador_t *jogador, unsigned int direcao, unsigned 
     }
 
     // atualiza mapa
+
+    // se ja tinha tesouro. soh retorna
+    if (jogador->mapa[jogador->pos_x][jogador->pos_y] == COM_TESOURO_VISITADA) {
+        return;
+    }
+    
+    // senao, atualiza estado
     jogador->mapa[jogador->pos_x][jogador->pos_y] = estado;
     // se achou um tesouro
     if (estado == COM_TESOURO_VISITADA) {
