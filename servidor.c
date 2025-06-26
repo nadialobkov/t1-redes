@@ -30,6 +30,7 @@ int main() {
 
     while (procurando_tesouros_tabuleiro(tabuleiro)) {
         // imprime informacoes do jogo
+        limpa_terminal();
         infos_jogo(tabuleiro);
 
         uint8_t tipo = espera_pacote(sock, pack_send, pack_recv);
@@ -49,8 +50,11 @@ int main() {
             case ESQ:
                 movimento_possivel = movimenta_jogador(tabuleiro, MOVE_ESQ);
                 break;
-            
+
             default:
+                // recebeu um pacote de outro tipo
+                // nao trata movimento
+                continue;
                 break;
         }
         uint8_t msg; // mensagem adicional

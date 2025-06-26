@@ -78,6 +78,7 @@ int main() {
             }
             else if (msg == TESOURO) {
                 atualiza_jogador(jogador, move, COM_TESOURO_VISITADA);
+                printf("🎖️ ENCONTROU TESOURO! 🎖️ Aguarde...\n");
                 recebe_dados(sock, pack_send, pack_recv);
             }
             #ifndef DEBUG
