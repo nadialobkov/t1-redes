@@ -147,21 +147,26 @@ void unescape_dados(pacote_t *pack) {
 
     uint8_t i = 0; // vai percorrer buffer
     uint8_t j = 0; // vai percorrer dados
+    uint8_t escapou = 0;
+
     while (j < pack->tam) {
-        // copia dado no buffer
-        buffer[i] = pack->dados[j];
-        i++;
-        j++;
-        // se eh byte especial, verifica proximo
-        if((pack->dados[j] == 0x88 || pack->dados[j] == 0x81) && pack->dados[j+1] == 0xff) {
-            // eh caracter de escape, pula posicao mais uma vez
-            j++;
-        }
+    // verifica se posicao atual eh byte especial
+    // e se temos espaço para olhar o próximo byte para ver se eh de escape
+    if ((pack->dados[j] == 0x88 || pack->dados[j] == 0x81) && (j + 1 < pack->tam) && (pack->dados[j + 1] == 0xff)) {
+        escapou = 1;
+        buffer[i++] = pack->dados[j];
+        j += 2; // pula o byte de escape (0xff)
+    } else {
+        buffer[i++] = pack->dados[j++];
     }
+}
+
     // copia buffer nos dados
-    memset(pack->dados, 0, TAM_MAX);
-    memcpy(pack->dados, buffer, i);
-    pack->tam = i;
+    if (escapou) {
+        printf("ESCAPOU!\n");
+        memcpy(pack->dados, buffer, i);
+        pack->tam = i;
+    }
 
     return;
 }
@@ -288,6 +293,8 @@ void recebe_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
         if (pack_recv->tipo == DADOS) {
             // verifica e escreve os dados
             unescape_dados(pack_recv);
+            printf("pacote pos-unescape:\n");
+            imprime_pacote(pack_recv);
             uint8_t escritos = fwrite(pack_recv->dados, 1, pack_recv->tam, arq);
             if (escritos != pack_recv->tam) {
                 perror("Erro na escrita");
