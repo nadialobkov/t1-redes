@@ -105,7 +105,7 @@ uint8_t recebe_pacote(int sock, pacote_t *pack);
 
 // NOTACAO ----------------------------------------------
 // pack_send => pacote que contem a mensagem a ser enviada
-// pack_recv => pacote por onde vai recever a mensagem
+// pack_recv => pacote por onde vai receber a mensagem
 
 
 // espera ate receber um pacote do tipo ACK

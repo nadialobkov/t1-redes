@@ -1,20 +1,89 @@
 # Caça ao Tesouro
-### Trabalho 1 - Redes de Computadores  
+### Trabalho 1 - Redes de Computadores (2025/1)
 ### Alunas:  
->Giovanna FIoravante Dalledone (GRR: 20232370)  
+Giovanna Fioravante Dalledone (GRR: 20232370)  
 Nadia Luana Lobkov (GRR: 20232381)
+
+## Implementação
+
+### Estrutura dos Pacotes
+
+Os pacotes são implementados em forma de ```struct``` e contem os campos previstos no protocolo proposto.
+
+```c
+struct pacote {
+    // cabecalho do pacote
+    uint8_t marcador;   // 8 bits para marcador de inicio
+    uint8_t tam : 7;    // 7 bits para tamanho dos dados
+    uint8_t seq : 5;    // 5 bits para campo de sequencia
+    uint8_t tipo : 4;   // 4 bits para tipo da mensagem   
+    uint8_t checksum;   // 8 bits para checksum
+
+    //dados
+    uint8_t dados[127]; // vetor de bytes de dados
+};
+```
+
+Usamos o tipo ```uint8_t``` (que corresponte a um espaço de 8 bits sem sinal) para poder manipular os dados 
+de maneira mais segura e versátil. Para garantir que o pacote tenha exatamente 131 bytes, usamos ```#pragma pack``` 
+para evitar o alinhamento de bytes dos dados.
+
+### Protocolo
+
+As mensagens com tipos iguais a 3 e 14 estavam livres para a escolha de suas respectivas funcionalidades. 
+Para o número 3 foi escolhido o tipo SYN que é utilizado na conexão inicial. 
+
+Ele é responsável pela sincroniação, ou seja, subir primeiro o cliente e depois o servidor não faz diferença por 
+conta dele. O tipo número 14 é auxiliar e representa a ocorrência do timeout.  
+
+Além disso, um novo código de erro foi definido: `MOV_INV` (movimento inválido). Duas macros foram definidas para 
+o caso do OK: OK `NORMAL` e OK `TESOURO`. No primeiro caso, a posição atual do jogador não contém nenhum tesouro e, 
+por consequência, o OK Tesouro significa o oposto.
+
+```c
+// tipos de mensagens
+#define SYN     3   // conexao inicial
+#define TIMEOUT 14  // tipo auxiliar que indica que houve timeout
+
+// codigos de erros
+#define SEM_PERM    0   // sem permissao de acesso
+#define SEM_ESP     1   // espaco insuficiente
+#define MOVE_INV    2   // movimento invalido no tabuleiro
+
+// codigos para o OK
+#define NORMAL      0   // posicao normal (vazia)
+#define TESOURO     1   // posicao com tesouro
+```
+
+As funções de **enviar e receber** pacotes sofreram um versinonamento interessante. No início da implementação do trabalho, 
+ambas as funções alocavam um ponteiro pacote para cada mensagem que deveria ser recebida, ou enviada. Além de muito estranho 
+de manipular e visualizar, era muito fácil e perigoso liberar o ponteiro em um momento errado e acabar perdendo a informação 
+apontada por ele. Como solução do problema, atualmente, ambas as funções mantém apenas um ponteiro pacote que é sobrescrito 
+sempre que necessário. A função de enviar pacotes não tem retorno, enquanto a função que os recebe retorna o tipo do pacote recebido.
+
+Portanto, foi estabelecida a seguinte notação
+
+- `pack_send`: pacote que contem a mensagem a ser enviada
+- `pack_recv`: pacote por onde vai receber a mensagem
+
+
+
+
 
 ## Estrutura do Trabalho
 ```
-    makefile
-    pacote.h
-    sock.h
-    timer.h
-    jogo.h
-    servidor.c
-    cliente.c
-    script.sh
+t1-redes
+├── makefile
+├── script.sh
+├── pacote.h
+├── sock.h
+├── timer.h
+├── jogo.h
+├── servidor.c
+├── cliente.c
 ```
+
+
 O trabalho foi dividido em 6 tipos de arquivos, nos quais:
 1. `Makefile`: Além de compilar os arquivos para gerar o executável, o makefile possue utilizades específicas para o projeto como:
     1. Limpar a pasta de arquivos (tesouros) encontrados pelo cliente;
