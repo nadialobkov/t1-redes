@@ -243,7 +243,7 @@ uint8_t recebe_pacote(int sock, pacote_t *pack) {
 // pack_recv => pacote por onde vai recever a mensagem
 void espera_ack(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 
-    while (deu_timeout() || (recebe_pacote(sock, pack_recv) != ACK)) {
+    while ((recebe_pacote(sock, pack_recv) != ACK)) {
         envia_pacote(sock, pack_send); // reenvia
     }
     return;
