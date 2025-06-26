@@ -59,14 +59,25 @@ As funções de **enviar e receber** pacotes sofreram um versinonamento interess
 ambas as funções alocavam um ponteiro pacote para cada mensagem que deveria ser recebida, ou enviada. Além de muito estranho 
 de manipular e visualizar, era muito fácil e perigoso liberar o ponteiro em um momento errado e acabar perdendo a informação 
 apontada por ele. Como solução do problema, atualmente, ambas as funções mantém apenas um ponteiro pacote que é sobrescrito 
-sempre que necessário. A função de enviar pacotes não tem retorno, enquanto a função que os recebe retorna o tipo do pacote recebido.
+sempre que necessário. A função de enviar pacotes não tem retorno, enquanto a função que os recebe retorna o tipo do pacote recebido
+ou TIMEOUT se houve timeout.
 
 Portanto, foi estabelecida a seguinte notação
 
 - `pack_send`: pacote que contem a mensagem a ser enviada
 - `pack_recv`: pacote por onde vai receber a mensagem
 
+O lógica **timeout** foi implementada com o auxilio da biblioteca `signal`. A cada milissegundo é disparada uma função que conta os ticks 
+de relógio e ao chegar no TIMEOUT_MAX uma flag global e setada para informar que houve timeout. A função que verifica isso é a de recebimento de 
+pacotes. Quando acontece um timeout, a função para de receber pacotes e retorna o tipo TIMEOUT, assim, funções de **espera de pacotes** podem usar
+essa sinalização para **reenviar a sua mensagem**.
 
+O **envio de ACKS e NACKS** acontece na verificação dos pacotes. A função `espera_pacote()` fica aguardando o recebimento de uma mensagem e assim que
+recebe, caso seu tipo não for TIMEOUT, faz a validação do checksum. Se houve erro, é enviado um NACK e em caso de sucesso é enviado um ACK. Enquanto não
+enviar um ACK ele ficará esperando pacotes válidos. 
+
+Na função que calcula o cheksum existe uma manipulação (`checksum = checksum & 0xFF`) que garante que o valor final contenha sempre 8 bits, pois realiza 
+um AND  bit a bit com 8 bits 1.
 
 
 
