@@ -68,7 +68,7 @@ Portanto, foi estabelecida a seguinte notação
 - `pack_recv`: pacote por onde vai receber a mensagem
 
 O lógica **timeout** foi implementada com o auxilio da biblioteca `signal`. A cada milissegundo é disparada uma função que conta os ticks 
-de relógio e ao chegar no TIMEOUT_MAX uma flag global e setada para informar que houve timeout. A função que verifica isso é a de recebimento de 
+de relógio e ao chegar no TIMEOUT_MAX uma flag global é setada para informar que houve timeout. A função que verifica isso é a de recebimento de 
 pacotes. Quando acontece um timeout, a função para de receber pacotes e retorna o tipo TIMEOUT, assim, funções de **espera de pacotes** podem usar
 essa sinalização para **reenviar a sua mensagem**.
 
