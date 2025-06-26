@@ -46,11 +46,13 @@ void destroi_pacote(pacote_t *pack) {
 
 // imprime informacoes do pacote (tipo, tamanho, dados)
 void imprime_pacote(pacote_t *pack) {
-    
+
+    printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
     if (!pack) {
         printf("Pacote inválido\n");
         return;
     }
+
     printf("Pacote: ");
     switch (pack->tipo) {
         case ACK: printf("ACK\n"); break;
@@ -71,14 +73,25 @@ void imprime_pacote(pacote_t *pack) {
         default: break;
     }
 
+    printf("\tNúmero sequencia: %d\n", pack->seq);
     printf("\tTamanho: %d bytes\n", pack->tam);
     // copia dados para buffer para imprimir
-    uint8_t buffer[TAM_MAX+1];
+    uint8_t buffer[pack->tam];
     strncpy(buffer, pack->dados, pack->tam);
-    buffer[TAM_MAX] = '\0';
-    printf("\tDados: %s\n", buffer);
+    printf("\tDados:\n");
+    // formatacao dados em hexa
+    for (int i = 0; i < pack->tam; i ++) {
+        if ((i % 16) == 0) {
+            printf("\t\t");
+        }
+        printf("%2x ", buffer[i]);
+        if ((i % 16) == 15) {
+            printf("\n");
+        }
+    }
+    printf("\n");
 
-    return;
+    return; 
 }
 
 // retorna o primeiro byte de dados
@@ -198,7 +211,6 @@ void envia_pacote(int sock, pacote_t *pack) {
 // escreve em 'pack' o pacote recebido
 uint8_t recebe_pacote(int sock, pacote_t *pack) {
 
-    unsigned int timeout;
     int bytes_lidos = 0;
     uint8_t marc = 0;
 
@@ -207,13 +219,12 @@ uint8_t recebe_pacote(int sock, pacote_t *pack) {
         // vai ficar esperando mensagens ate receber algo ou dar timeout
         do {
             bytes_lidos = recv(sock, pack, TAM_PAC, 0);
-            timeout = deu_timeout();
-        } while ((bytes_lidos <= 0) && !timeout);
+            // se deu timeout, sai do laco retornando aviso de timeout
+            if (deu_timeout()) {
+                return TIMEOUT;
+            }
+        } while ((bytes_lidos <= 0));
 
-        // se deu timeout, sai do laco retornando aviso de timeout
-        if (timeout) {
-            return TIMEOUT;
-        }
 
         marc = pack->marcador;
     }

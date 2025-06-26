@@ -112,10 +112,10 @@ void imprime_mapa(struct jogador_t *jogador)
             else if (jogador->mapa[i][k] == COM_TESOURO_VISITADA)
                 printf("│ 🎖️  │ ");
             else if (jogador->mapa[i][k] == SEM_TESOURO_VISITADA)
-                printf("│ ❌ │ ");   //mudar
+                printf("│ ❤️  │ ");   
             else
-                printf("│ ⚜️  │ ");
-        }
+                printf("│ 🤍 │ ");
+        }                
         printf("\n");
 
         //Inferior dos quadradinhos
@@ -375,5 +375,6 @@ void infos_jogo(struct tabuleiro_t *tabuleiro)
     printf("│Posições dos Tesouros:                   │ \n");
     for (int i = 0; i < 8; i++)
         printf("│ID: %d -> (%d, %d)                          │\n", i, tabuleiro->posicao_tesouro[i].x, tabuleiro->posicao_tesouro[i].y);
+    printf("│ Posicao jogador: (%d, %d)                 │\n", tabuleiro->posicao_jogador.x, tabuleiro->posicao_jogador.y);
     printf("└─────────────────────────────────────────┘ \n");
 }

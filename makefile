@@ -12,6 +12,7 @@ CLIENT_SRC = cliente.c pacote.o sock.o timer.o jogo.o
 
 # regra para compilar tudo
 all: $(SERVER_EXEC) $(CLIENT_EXEC)
+	mkdir -p arq_cliente
 
 # compilar o servidor
 $(SERVER_EXEC): $(SERVER_SRC)
@@ -26,6 +27,7 @@ $(CLIENT_EXEC): $(CLIENT_SRC)
 
 debug: CFLAGS += -DDEBUG
 debug: $(SERVER_EXEC) $(CLIENT_EXEC)
+	mkdir -p arq_cliente
 
 # limpar arquivos objeto e executáveis
 clean:
