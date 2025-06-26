@@ -30,8 +30,13 @@ int main() {
 
     while (procurando_tesouros_tabuleiro(tabuleiro)) {
         // imprime informacoes do jogo
+        #ifndef DEBUG
         limpa_terminal();
+        #endif
         infos_jogo(tabuleiro);
+        #ifdef DEBUG
+        imprime_pacote(pack_recv);
+        #endif
 
         uint8_t tipo = espera_pacote(sock, pack_send, pack_recv);
         // espera receber pacote de movimento
