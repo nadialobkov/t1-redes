@@ -139,13 +139,31 @@ void exibe_arquivo(const char *caminho_arquivo)
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void unescape_dados(uint8_t *dados, uint8_t tam) {
-    for(int i = 0; i < tam-1; i++) {
-        if((dados[i] == 0x88 || dados[i] == 0x81) && dados[i+1] == 0xff) {
-            // remove o byte de escape, muda para zero
-            dados[i+1] = 0;
+void unescape_dados(pacote_t *pack) {
+
+    // cria buffer para dados atualizados (sem o byte de escape)
+    uint8_t buffer[TAM_MAX];
+    memset(buffer, 0, TAM_MAX);
+
+    uint8_t i = 0; // vai percorrer buffer
+    uint8_t j = 0; // vai percorrer dados
+    while (j < pack->tam) {
+        // copia dado no buffer
+        buffer[i] = pack->dados[j];
+        i++;
+        j++;
+        // se eh byte especial, verifica proximo
+        if((pack->dados[j] == 0x88 || pack->dados[j] == 0x81) && pack->dados[j+1] == 0xff) {
+            // eh caracter de escape, pula posicao mais uma vez
+            j++;
         }
     }
+    // copia buffer nos dados
+    memset(pack->dados, 0, TAM_MAX);
+    memcpy(pack->dados, buffer, i);
+    pack->tam = i;
+
+    return;
 }
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -197,16 +215,16 @@ void envia_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv, char *nome)
     uint8_t seq = 0; // numero de sequencia
     uint8_t i = 0; // iterador para contar bytes lidos
 
-    // le dados do arquivo
+    // le dados do arquivo byte a byte
     while (fread(&byte, 1, 1, arq) > 0) {
 
-        if (i < TAM_MAX-1) {
+        if (i < TAM_MAX) {
             // ainda eh possivel escrever nos dados
             dados[i] = byte;
             i++;
             // verifica se eh byte especial
-            if (byte == 0x81 || byte == 0x88) {
-                dados[i] = 0xff; // adiciona escape antes
+            if ((i < TAM_MAX) && ((byte == 0x81) || (byte == 0x88))) {
+                dados[i] = 0xff; // adiciona escape logo apos
                 i++;
         }
         }
@@ -269,7 +287,7 @@ void recebe_dados(int sock, pacote_t *pack_send, pacote_t *pack_recv) {
 
         if (pack_recv->tipo == DADOS) {
             // verifica e escreve os dados
-            unescape_dados(pack_recv->dados, pack_recv->tam);
+            unescape_dados(pack_recv);
             uint8_t escritos = fwrite(pack_recv->dados, 1, pack_recv->tam, arq);
             if (escritos != pack_recv->tam) {
                 perror("Erro na escrita");

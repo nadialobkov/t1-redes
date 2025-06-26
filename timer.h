@@ -2,7 +2,7 @@
 #define _TIMER_H_
 
 // tempo do timeout em milisegundos
-#define TIMEOUT_MAX 500 
+#define TIMEOUT_MAX 1000 
 
 // -------------------------------------------
 
