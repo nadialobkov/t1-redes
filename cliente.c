@@ -12,7 +12,7 @@
 int main() {
 
     // criamos um socket com interface das maquinas virtuais
-    int sock = cria_raw_socket("veth0");
+    int sock = cria_raw_socket("eno1");
   
     // cria pacote para enviar mensagens
     pacote_t *pack_send = cria_pacote();
